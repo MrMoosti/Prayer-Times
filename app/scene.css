@@ -215,15 +215,15 @@
   transition: filter 2s linear;
 }
 
-.land__band--back { bottom: 20%; opacity: 0.92; }
-.land__band--mid { bottom: 13%; }
-.land__band--front { bottom: 6%; }
+.land__band--back { bottom: 14%; opacity: 0.92; }
+.land__band--mid { bottom: 8%; }
+.land__band--front { bottom: 2%; }
 
 .land__mosque {
   position: absolute;
-  right: 4.5%;
-  bottom: 30%;
-  width: 34rem;
+  right: 16%;
+  bottom: 26%;
+  width: 40rem;
   filter: brightness(var(--land-bright, 1));
   transition: filter 2s linear;
 }

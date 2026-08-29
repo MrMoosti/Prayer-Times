@@ -11,7 +11,7 @@ export const PRAYABLE_KEYS = PRAYER_KEYS.filter((k) => k !== 'sunrise') as Exclu
 
 export const PRAYER_LABELS: Record<PrayerKey, { name: string; subtitle: string }> = {
   fajr: { name: 'Fajr', subtitle: 'Dawn prayer' },
-  sunrise: { name: 'Sunrise', subtitle: 'Sunrise' },
+  sunrise: { name: 'Sunrise', subtitle: 'Fajr ends' },
   dhuhr: { name: 'Dhuhr', subtitle: 'Midday prayer' },
   asr: { name: 'Asr', subtitle: 'Afternoon prayer' },
   maghrib: { name: 'Maghrib', subtitle: 'Evening prayer' },
@@ -38,8 +38,8 @@ export interface Settings {
   adhanEnabled: Record<PrayerKey, boolean>;
   notificationsEnabled: boolean;
   clock24h: boolean;
-  /** 'auto' follows the sun for the configured location. */
-  theme: 'auto' | 'day' | 'night';
+  /** 'auto' switches to dark at Maghrib and back at sunrise. */
+  theme: 'auto' | 'light' | 'dark';
   showWeather: boolean;
   reducedMotion: boolean;
 }

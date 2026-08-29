@@ -25,7 +25,7 @@ export default function PrayerTimesCard({
       <div className="card__head">
         <h2 className="card__title">Today’s Prayer Times</h2>
         <span className="card__action" aria-hidden="true">
-          <ClockIcon width={24} height={24} />
+          <ClockIcon width={26} height={26} />
         </span>
       </div>
 
@@ -33,17 +33,17 @@ export default function PrayerTimesCard({
         {loading || !schedule
           ? Array.from({ length: 6 }, (_, i) => <div key={i} className="skeleton" />)
           : schedule.entries.map((entry) => {
-              const muted = !settings.adhanEnabled[entry.key];
+              const announced = settings.adhanEnabled[entry.key];
               const isPrayer = entry.key !== 'sunrise';
               return (
                 <div
                   key={entry.key}
                   className="row"
-                  data-current={entry.current}
+                  data-current={entry.next}
                   data-passed={entry.passed}
                 >
                   <span className="clay-badge row__icon">
-                    <PrayerGlyph prayer={entry.key} width={22} height={22} />
+                    <PrayerGlyph prayer={entry.key} width={24} height={24} />
                   </span>
                   <span className="row__name">{PRAYER_LABELS[entry.key].name}</span>
                   <span className="row__time">
@@ -53,7 +53,7 @@ export default function PrayerTimesCard({
                     <button
                       type="button"
                       className="row__speaker"
-                      data-muted={muted}
+                      data-muted={!announced}
                       onClick={(event) => {
                         // Click toggles; shift-click plays the call now so the
                         // volume can be checked without waiting for the time.
@@ -61,14 +61,14 @@ export default function PrayerTimesCard({
                         else onToggleAdhan(entry.key);
                       }}
                       title={
-                        muted
-                          ? `${PRAYER_LABELS[entry.key].name} announcement is off`
-                          : `${PRAYER_LABELS[entry.key].name} will be announced — shift-click to hear it now`
+                        announced
+                          ? `${PRAYER_LABELS[entry.key].name} will be announced — shift-click to hear it now`
+                          : `${PRAYER_LABELS[entry.key].name} announcement is off`
                       }
-                      aria-label={`${muted ? 'Enable' : 'Disable'} the ${PRAYER_LABELS[entry.key].name} announcement`}
-                      aria-pressed={!muted}
+                      aria-label={`${announced ? 'Disable' : 'Enable'} the ${PRAYER_LABELS[entry.key].name} announcement`}
+                      aria-pressed={announced}
                     >
-                      <SpeakerIcon muted={muted} width={24} height={24} />
+                      <SpeakerIcon muted={!announced} width={26} height={26} />
                     </button>
                   )}
                 </div>

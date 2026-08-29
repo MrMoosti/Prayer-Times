@@ -2,7 +2,15 @@
 
 import { useEffect, useMemo } from 'react';
 import { moonPosition, sunPosition } from '@/lib/solar';
-import { applyWeather, paletteFor, paletteToCssVars, skyPhase, type SkyPhase } from '@/lib/sky';
+import {
+  UI_DARK,
+  UI_LIGHT,
+  applyWeather,
+  paletteToCssVars,
+  skyFor,
+  skyPhase,
+  type SkyPhase,
+} from '@/lib/sky';
 import { CLEAR_EFFECTS, describeWeather, type SceneEffects } from '@/lib/weather';
 import type { Settings, WeatherNow } from '@/lib/types';
 
@@ -81,10 +89,12 @@ interface Props {
   weather: WeatherNow | null;
   /** Minute-resolution clock; the sky does not need to move every second. */
   minuteNow: number;
+  /** Decided by the caller from Maghrib, not from the sun's altitude. */
+  dark: boolean;
   onState?: (state: SceneState) => void;
 }
 
-export default function SceneBackground({ settings, weather, minuteNow, onState }: Props) {
+export default function SceneBackground({ settings, weather, minuteNow, dark, onState }: Props) {
   const { latitude, longitude } = settings.location;
 
   const scene = useMemo(() => {
@@ -101,20 +111,18 @@ export default function SceneBackground({ settings, weather, minuteNow, onState 
       ? describeWeather(weather.code, weather.cloudCover, sunAlt < -6)
       : CLEAR_EFFECTS;
 
+    // A pinned theme also pins the sky, so "dark mode" is not a bright sky
+    // behind dark cards.
     const forced =
-      settings.theme === 'day' ? 25 : settings.theme === 'night' ? -30 : sunAlt;
-    const palette = applyWeather(
-      paletteFor(forced, rising),
-      effects.cloudiness,
-      effects.fog,
-    );
+      settings.theme === 'light' ? Math.max(sunAlt, 25) : settings.theme === 'dark' ? Math.min(sunAlt, -30) : sunAlt;
+    const sky = applyWeather(skyFor(forced, rising), effects.cloudiness, effects.fog);
 
     // Hills and the mosque are one flat art asset; brightness carries them
     // through the day rather than a second night-time set of images.
     const bright = Math.max(0.3, Math.min(1.05, 0.34 + (forced + 12) / 26));
 
     return {
-      palette,
+      sky,
       effects,
       rising,
       sunAlt,
@@ -145,7 +153,7 @@ export default function SceneBackground({ settings, weather, minuteNow, onState 
   // Palette tokens live on <html> so cards, text and the scene share them.
   useEffect(() => {
     const root = document.documentElement;
-    const vars = paletteToCssVars(scene.palette);
+    const vars = paletteToCssVars(scene.sky, dark ? UI_DARK : UI_LIGHT);
     for (const [key, value] of Object.entries(vars)) root.style.setProperty(key, value);
     root.style.setProperty('--land-bright', scene.bright.toFixed(3));
     root.style.setProperty('--land-sat', (0.7 + scene.bright * 0.35).toFixed(3));
@@ -158,7 +166,7 @@ export default function SceneBackground({ settings, weather, minuteNow, onState 
       '--rain-speed',
       `${(0.85 - scene.effects.precipitation * 0.16).toFixed(2)}s`,
     );
-  }, [scene]);
+  }, [scene, dark]);
 
   const { effects } = scene;
   const sunVisible = scene.sunAlt > -8;

@@ -15,6 +15,8 @@ export interface ScheduleEntry {
   /** True for the next entry due, sunrise included. */
   next: boolean;
   passed: boolean;
+  /** Set on the next entry when it belongs to the following day. */
+  tomorrow?: boolean;
 }
 
 export interface Schedule {
@@ -83,11 +85,25 @@ export function buildSchedule(
   const currentEntry = reached.length ? reached[reached.length - 1] : null;
   if (currentEntry) currentEntry.current = true;
 
-  let nextAt: number | null = nextEntry?.at ?? null;
-  if (nextAt == null && tomorrow) {
+  // After Isha nothing is left today, so the countdown - and the card that
+  // names it - roll over to tomorrow's Fajr. The rolled-over entry is
+  // deliberately not added to `entries`: today's Fajr row must not light up.
+  let next = nextEntry;
+  if (!next && tomorrow) {
     const tomorrowTimes = withOffsets(tomorrow, settings.offsets);
-    nextAt = tomorrowTimes.fajr ?? null;
+    if (tomorrowTimes.fajr != null) {
+      next = {
+        key: 'fajr',
+        at: tomorrowTimes.fajr,
+        current: false,
+        next: true,
+        passed: false,
+        tomorrow: true,
+      };
+    }
   }
+
+  const nextAt: number | null = next?.at ?? null;
 
   let current = currentEntry;
   if (!current && yesterday) {
@@ -102,7 +118,7 @@ export function buildSchedule(
     date: today,
     entries,
     current,
-    next: nextEntry,
+    next,
     nextAt,
     kerahat: buildKerahat(times),
   };
