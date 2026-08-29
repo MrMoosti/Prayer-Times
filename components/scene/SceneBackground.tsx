@@ -97,13 +97,13 @@ function buildClouds(cloudiness: number, raining: boolean): CloudSprite[] {
 
 /** Trees and bush clumps standing in front of the hill band. */
 const SCENERY: Array<{ src: string; left: string; bottom: string; width: string }> = [
-  { src: '/scene/tree.webp', left: '4%', bottom: '30%', width: '8rem' },
-  { src: '/scene/bushes.webp', left: '11%', bottom: '28%', width: '10rem' },
-  { src: '/scene/bushes.webp', left: '31%', bottom: '33%', width: '8rem' },
-  { src: '/scene/tree.webp', left: '45%', bottom: '31%', width: '6.5rem' },
-  { src: '/scene/bushes.webp', left: '57%', bottom: '36%', width: '7rem' },
-  { src: '/scene/tree.webp', left: '85%', bottom: '32%', width: '7.5rem' },
-  { src: '/scene/bushes.webp', left: '93%', bottom: '29%', width: '9rem' },
+  { src: '/scene/tree.webp', left: '4%', bottom: '22%', width: '9rem' },
+  { src: '/scene/bushes.webp', left: '12%', bottom: '19%', width: '11rem' },
+  { src: '/scene/bushes.webp', left: '31%', bottom: '25%', width: '9rem' },
+  { src: '/scene/tree.webp', left: '46%', bottom: '23%', width: '7.5rem' },
+  { src: '/scene/bushes.webp', left: '58%', bottom: '28%', width: '8rem' },
+  { src: '/scene/tree.webp', left: '86%', bottom: '24%', width: '8.5rem' },
+  { src: '/scene/bushes.webp', left: '94%', bottom: '21%', width: '10rem' },
 ];
 
 export interface SceneState {

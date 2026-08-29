@@ -184,14 +184,16 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 48%;
+  height: 44%;
 }
 
 /* Dissolves the base of the hills into the ground the cards stand on. */
 .land::after {
   content: '';
   position: absolute;
-  inset: 62% 0 -4% 0;
+  /* Starts below the card line, so the fade never washes out the band the
+     viewer can actually see. */
+  inset: 74% 0 -4% 0;
   background: linear-gradient(to bottom, transparent, var(--page-bg) 76%);
 }
 
@@ -217,7 +219,7 @@
   /* Placed so the dome clears the weather chip and the minaret passes just to
      its left; the reference has an empty top-right corner, this layout does not. */
   right: 20%;
-  bottom: 40%;
+  bottom: 28%;
   width: 28rem;
   aspect-ratio: 1200 / 1023;
 }
@@ -427,11 +429,17 @@
     display: none;
   }
 
+  /* The arc is sized for a 16:9 frame; on a stacked phone layout it lands on
+     the header, so the bodies shrink and lift clear of it. */
   .celestial--sun {
-    width: 11rem;
+    width: 8.5rem;
   }
 
   .celestial--moon {
-    width: 8rem;
+    width: 6.5rem;
+  }
+
+  .celestial {
+    transform: translate(-50%, -50%) translateY(-4rem);
   }
 }
