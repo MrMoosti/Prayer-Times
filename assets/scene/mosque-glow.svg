@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" width="900" height="760">
+  <defs>
+    <linearGradient id="window-lit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF0BE"/>
+      <stop offset="1" stop-color="#F2B13F"/>
+    </linearGradient>
+    <filter id="bloom" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+  </defs>
+  <g opacity="0.85" filter="url(#bloom)"><g id="windows">
+    <path d="M385 520 C 425 520 442 552 442 588 L 442 700 L 328 700 L 328 588 C 328 552 345 520 385 520 Z" fill="url(#window-lit)"/>
+    <path d="M232 592 C 258 592 270 614 270 638 L 270 700 L 194 700 L 194 638 C 194 614 206 592 232 592 Z" fill="url(#window-lit)"/>
+    <path d="M540 592 C 566 592 578 614 578 638 L 578 700 L 502 700 L 502 638 C 502 614 514 592 540 592 Z" fill="url(#window-lit)"/>
+    <path d="M779 268 C 792 268 798 280 798 294 L 798 330 L 760 330 L 760 294 C 760 280 766 268 779 268 Z" fill="url(#window-lit)"/>
+  </g>
+
+  </g>
+  <g id="windows">
+    <path d="M385 520 C 425 520 442 552 442 588 L 442 700 L 328 700 L 328 588 C 328 552 345 520 385 520 Z" fill="url(#window-lit)"/>
+    <path d="M232 592 C 258 592 270 614 270 638 L 270 700 L 194 700 L 194 638 C 194 614 206 592 232 592 Z" fill="url(#window-lit)"/>
+    <path d="M540 592 C 566 592 578 614 578 638 L 578 700 L 502 700 L 502 638 C 502 614 514 592 540 592 Z" fill="url(#window-lit)"/>
+    <path d="M779 268 C 792 268 798 280 798 294 L 798 330 L 760 330 L 760 294 C 760 280 766 268 779 268 Z" fill="url(#window-lit)"/>
+  </g>
+
+  
+</svg>
