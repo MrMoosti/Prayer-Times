@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "scene": "node scripts/build-scene.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "diyanet:check": "node --conditions=react-server scripts/diyanet-check.mjs"
   },
   "dependencies": {
     "next": "^16.3.3",

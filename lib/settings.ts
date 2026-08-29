@@ -29,6 +29,7 @@ export const HIGH_LATITUDE_LABELS: Record<Settings['highLatitudeRule'], string> 
 
 export const DEFAULT_SETTINGS: Settings = {
   location: DEFAULT_LOCATION,
+  diyanet: null,
   method: 13,
   highLatitudeRule: 'oneSeventh',
   offsets: zeroOffsets(),
@@ -50,10 +51,14 @@ export function normalizeSettings(input: unknown): Settings {
     Math.abs(location.latitude) <= 90 &&
     Math.abs(location.longitude) <= 180;
 
+  const diyanet =
+    stored.diyanet && Number.isFinite(stored.diyanet.cityId) ? stored.diyanet : null;
+
   return {
     ...DEFAULT_SETTINGS,
     ...stored,
     location: valid ? location : DEFAULT_SETTINGS.location,
+    diyanet,
     offsets: { ...zeroOffsets(), ...(stored.offsets ?? {}) },
     adhanEnabled: { ...defaultAdhan(), ...(stored.adhanEnabled ?? {}) },
   };

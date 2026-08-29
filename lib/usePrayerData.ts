@@ -20,6 +20,7 @@ function calendarUrl(settings: Settings, year: number): string {
     highLatitudeRule: settings.highLatitudeRule,
     year: String(year),
   });
+  if (settings.diyanet) params.set('diyanetCityId', String(settings.diyanet.cityId));
   return `/api/prayer-times?${params}`;
 }
 
@@ -36,7 +37,7 @@ export function useCalendar(settings: Settings, enabled: boolean): CalendarState
     error: null,
   });
 
-  const { location, method, highLatitudeRule } = settings;
+  const { location, method, highLatitudeRule, diyanet } = settings;
   const today = isoDateIn(Date.now(), location.timezone);
   const year = Number(today.slice(0, 4));
   const nearYearEnd = today.slice(5) >= '12-28';
@@ -84,6 +85,7 @@ export function useCalendar(settings: Settings, enabled: boolean): CalendarState
     location.timezone,
     method,
     highLatitudeRule,
+    diyanet?.cityId,
     year,
     nearYearEnd,
     nearYearStart,

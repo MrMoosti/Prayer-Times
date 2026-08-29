@@ -158,7 +158,11 @@ export default function Dashboard() {
 
         {error && <p className="notice">Prayer times unavailable: {error}</p>}
         {!error && calendar?.source === 'calculated' && (
-          <p className="notice">Offline — times calculated locally for {settings.location.name}.</p>
+          <p className="notice">
+            {settings.diyanet
+              ? `Diyanet unavailable — times calculated locally for ${settings.diyanet.cityName}.`
+              : `Offline — times calculated locally for ${settings.location.name}.`}
+          </p>
         )}
       </div>
 

@@ -22,8 +22,17 @@ npm run dev          # http://localhost:3000
 ```
 
 That is the whole setup. No API keys, no accounts, no environment variables:
-both upstream services are keyless, and if neither can be reached the app falls
-back to calculating the times itself and says so on screen.
+the default upstream services are keyless, and if neither can be reached the
+app falls back to calculating the times itself and says so on screen.
+
+With Docker:
+
+```bash
+cp .env.example .env          # optional — add Diyanet credentials here
+docker compose -f docker-compose.standalone.yml up -d --build
+```
+
+For **Coolify**, see [Deploying](#deploying).
 
 ```bash
 npm run build && npm start   # production
@@ -40,7 +49,8 @@ clock.
 
 | What | Source | Notes |
 | --- | --- | --- |
-| Prayer times | [Aladhan](https://aladhan.com/prayer-times-api) `/calendar/{year}?annual=true` | Keyless. Method 13 is Diyanet İşleri Başkanlığı, the default. |
+| Prayer times (preferred) | [Diyanet](https://awqatsalah.diyanet.gov.tr) `/api/PrayerTime/Monthly/{cityId}` | Needs an account. Official times, one month at a time — see below. |
+| Prayer times (default) | [Aladhan](https://aladhan.com/prayer-times-api) `/calendar/{year}?annual=true` | Keyless. Method 13 is Diyanet İşleri Başkanlığı. |
 | Weather | [Open-Meteo](https://open-meteo.com) `/v1/forecast` | Keyless. Current conditions, WMO code. |
 | City search | Open-Meteo geocoding | Keyless. Falls back to a bundled list of ~28 cities offline. |
 
@@ -49,22 +59,23 @@ location; the response is cached on disk under `.cache/prayer/` and reused for
 the rest of the year. Changing the location or the calculation method fetches a
 new year; changing an offset does not, because offsets are applied client-side.
 
-Both upstream base URLs can be overridden if you proxy them:
+Every base URL can be overridden if you proxy them:
 
 ```bash
+DIYANET_BASE_URL=https://awqatsalah.diyanet.gov.tr
 ALADHAN_BASE_URL=https://api.aladhan.com/v1
 OPEN_METEO_BASE_URL=https://api.open-meteo.com/v1
 OPEN_METEO_GEOCODING_URL=https://geocoding-api.open-meteo.com/v1
 ```
 
-### If Aladhan cannot be reached
+### If no API can be reached
 
 `lib/solar.ts` computes the year locally from the sun's position, using the
-Diyanet angles (Fajr 18°, Isha 17°, Asr shadow factor 1). The header notice says
-`Offline — times calculated locally` whenever this is what you are looking at,
-and the app retries the API on the next load. Spot-checked against published
-tables it lands within a couple of minutes at Istanbul, Mecca, Jakarta and
-Rijswijk.
+Diyanet angles (Fajr 18°, Isha 17°, Asr shadow factor 1). The notice at the
+bottom of the screen says `times calculated locally` whenever this is what you
+are looking at, and the app retries on the next load. Spot-checked against
+published tables it lands within a couple of minutes at Istanbul, Mecca,
+Jakarta and Rijswijk.
 
 Above roughly 48° latitude the sun never dips 18° below the horizon in
 midsummer, so Fajr and Isha have no astronomical time — and for weeks either
@@ -74,12 +85,63 @@ configurable in settings, matching Aladhan's `latitudeAdjustmentMethod`). The
 rule only engages when a time is genuinely missing or lands within an eighth of
 the night of solar midnight, so it leaves correct mid-latitude times alone.
 
-### Swapping in the official Diyanet API
+## Diyanet
 
-`lib/calendar-source.ts` has one function that talks to the network,
-`fetchFromAladhan`, returning a `YearlyCalendar`. Write a second one against
-`namazvakitleri.diyanet.gov.tr` (it needs an account and a bearer token) and
-call it first in `getYearlyCalendar`; nothing else in the app changes.
+Put an account for [awqatsalah.diyanet.gov.tr](https://awqatsalah.diyanet.gov.tr)
+in `.env`:
+
+```bash
+cp .env.example .env
+# DIYANET_EMAIL=you@example.com
+# DIYANET_PASSWORD=…
+```
+
+Restart, open the settings drawer, and a **Diyanet place** section appears.
+Diyanet addresses places by its own ids, so pick Country → Province → District;
+the location above it keeps driving the weather and the sky.
+
+![The Diyanet place picker](docs/diyanet-settings.webp)
+
+Check the credentials before trusting the screen:
+
+```bash
+npm run diyanet:check                  # log in, list countries
+npm run diyanet:check -- --country 2   # provinces in Türkiye
+npm run diyanet:check -- --state 539   # districts in that province
+npm run diyanet:check -- --city 9541   # fetch a month, show it parsed
+```
+
+### Two constraints worth knowing before you rely on it
+
+**There is no yearly endpoint.** The largest is `/api/PrayerTime/Monthly/{cityId}`,
+and it takes no month parameter — it returns *the current month*. A year cannot
+be fetched from Diyanet, however patient you are.
+
+So the app accumulates. Each month's response is merged into a per-city store
+under `.cache/prayer/diyanet-{cityId}.json`, and the rest of the year is filled
+by the local calculation. A display left running collects the official month as
+each one arrives. The settings footer says exactly what you are looking at:
+`Diyanet · 30 official days, rest calculated`.
+
+**The quota is small.** The documentation states five requests per day *per
+endpoint* (counted per parameter value) for a Standard-role account, and says
+plainly that integrators are expected to host the data themselves. The app is
+built around that:
+
+- Country, province and district lists are cached on disk permanently — first
+  use only.
+- The access token is cached on disk and refreshed via `/api/Auth/RefreshToken`
+  rather than by logging in again.
+- Prayer times are fetched only when the store no longer covers today, and at
+  most once an hour.
+- A counter refuses to spend more than `DIYANET_DAILY_BUDGET` (default 4, under
+  the documented 5) per endpoint per day. When it trips, the display falls back
+  to calculated times and the drawer says why.
+
+Two things follow. **Keep `.cache` on a volume** — without it every restart
+re-spends the day's allowance. And **run one replica**; the counter is per
+process, so two instances sharing an account would each think they had a full
+allowance.
 
 ## Settings
 
@@ -160,24 +222,56 @@ re-run it after editing the art. To use your own renders instead, drop
 replacements into `public/scene/` under the same names; the scene component only
 knows about the filenames.
 
+## Deploying
+
+### Coolify
+
+1. **New Resource → Docker Compose**, pointed at this repository. It picks up
+   `docker-compose.yml`.
+2. In **Environment Variables**, set `DIYANET_EMAIL` and `DIYANET_PASSWORD`
+   (skip if you are staying on Aladhan).
+3. Deploy. Coolify substitutes `SERVICE_FQDN_MEKTEP_3000` with the domain it
+   assigns and routes its proxy to port 3000, so no host port is published.
+
+The compose file declares a `prayer-cache` volume on `/app/.cache`. Leave it
+in place: it holds the cached calendars, the Diyanet token and the quota
+counter. Keep the replica count at 1.
+
+`/api/health` backs both the container healthcheck and Coolify's.
+
+### Plain Docker
+
+```bash
+cp .env.example .env
+docker compose -f docker-compose.standalone.yml up -d --build
+```
+
+Publishes on `${PORT:-3000}`. The image is a multi-stage build on
+`node:22-bookworm-slim` shipping Next's `standalone` output, and runs as a
+non-root user.
+
 ## Layout
 
 ```
 app/
-  api/prayer-times/   yearly calendar, disk-cached
+  api/prayer-times/   the calendar: Diyanet → Aladhan → calculated
+  api/diyanet/        place cascade and credential/quota status
   api/weather/        current conditions, 10-minute memory cache
   api/geocode/        city search with an offline fallback
   api/audio/          lists any adhan recordings you added
+  api/health/         liveness probe
   globals.css         clay design system
   scene.css           the background and its animations
-components/           header, cards, nav, settings drawer, scene
+components/           header, cards, settings drawer, scene
 lib/
   solar.ts            sun/moon position; offline prayer calculation
-  sky.ts              altitude → palette
-  prayer.ts           schedule, current/next prayer, kerahat windows
+  sky.ts              altitude → sky; Maghrib → light/dark interface
+  prayer.ts           schedule, next prayer, kerahat windows
   time.ts             timezone-correct conversion and formatting
-  calendar-source.ts  Aladhan client, cache, local fallback
-scripts/              the artwork and its build
+  diyanet.ts          Diyanet auth, quota guard, place and time endpoints
+  diyanet-calendar.ts the accumulating per-city month store
+  calendar-source.ts  source selection, caching, local fallback
+scripts/              the artwork build and the Diyanet credential check
 ```
 
 ## Known gaps

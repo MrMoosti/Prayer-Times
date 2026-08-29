@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import DiyanetPicker from './DiyanetPicker';
 import { CloseIcon, PrayerGlyph } from './icons';
 import { CALCULATION_METHODS, HIGH_LATITUDE_LABELS } from '@/lib/settings';
 import {
@@ -121,12 +122,13 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
     onChange({ notificationsEnabled: permission === 'granted' });
   };
 
-  const source =
-    calendar?.source === 'aladhan'
-      ? `Aladhan · method ${calendar.method}`
-      : calendar
-        ? 'Calculated locally (API unreachable)'
-        : 'Loading';
+  const source = !calendar
+    ? 'Loading'
+    : calendar.source === 'diyanet'
+      ? `Diyanet · ${calendar.officialDays ?? 0} official days, rest calculated`
+      : calendar.source === 'aladhan'
+        ? `Aladhan · method ${calendar.method}`
+        : 'Calculated locally (API unreachable)';
 
   return (
     <>
@@ -191,10 +193,16 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
             </button>
           </div>
 
+          <DiyanetPicker settings={settings} onChange={onChange} />
+
           <div className="field">
             <label className="field__label" htmlFor="method">
               Calculation method
             </label>
+            <p className="field__hint">
+              Used by Aladhan and by the local calculation. Ignored while a Diyanet place is
+              selected — those times come straight from Diyanet.
+            </p>
             <select
               id="method"
               className="select"
@@ -339,6 +347,7 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
           <span>
             Times: {source}
             {calendar ? ` · ${calendar.days.length} days cached` : ''}
+            {calendar?.sourceNote ? ` · ${calendar.sourceNote}` : ''}
           </span>
           <button type="button" className="button-ghost" onClick={onReset}>
             Reset all

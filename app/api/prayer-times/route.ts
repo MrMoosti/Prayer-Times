@@ -14,6 +14,8 @@ export async function GET(request: Request) {
   const year = Number(params.get('year')) || new Date().getFullYear();
   const method = Number(params.get('method')) || 13;
   const timezone = params.get('timezone') || 'UTC';
+  const cityIdParam = Number(params.get('diyanetCityId'));
+  const diyanetCityId = Number.isFinite(cityIdParam) && cityIdParam > 0 ? cityIdParam : null;
   const ruleParam = params.get('highLatitudeRule') as HighLatitudeRule | null;
   const highLatitudeRule = ruleParam && RULES.includes(ruleParam) ? ruleParam : 'oneSeventh';
 
@@ -39,10 +41,16 @@ export async function GET(request: Request) {
     method,
     highLatitudeRule,
     timezone,
+    diyanetCityId,
   });
 
   return NextResponse.json(calendar, {
-    // The yearly calendar is static once fetched; let the browser keep it too.
-    headers: { 'cache-control': 'public, max-age=3600, stale-while-revalidate=86400' },
+    headers: {
+      // Aladhan's year is static once fetched. Diyanet's grows a month at a
+      // time, so it is held for a shorter spell.
+      'cache-control': calendar.source === 'diyanet'
+        ? 'public, max-age=600, stale-while-revalidate=3600'
+        : 'public, max-age=3600, stale-while-revalidate=86400',
+    },
   });
 }
