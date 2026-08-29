@@ -2,6 +2,8 @@ import 'server-only';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { PRAYER_KEYS, type DayTimes, type PrayerKey, type YearlyCalendar } from './types';
+import { diyanetConfigured } from './diyanet';
+import { refreshDiyanetStore } from './diyanet-calendar';
 import { isoDateIn, zonedToEpoch } from './time';
 import {
   ALADHAN_LATITUDE_METHOD,
@@ -25,6 +27,8 @@ export interface CalendarRequest {
   method: number;
   highLatitudeRule: HighLatitudeRule;
   timezone: string;
+  /** When set and credentials exist, Diyanet supplies the days it can. */
+  diyanetCityId?: number | null;
 }
 
 const key = (r: CalendarRequest) =>
@@ -171,11 +175,62 @@ export function computeYear(r: CalendarRequest): YearlyCalendar {
 }
 
 /**
- * Cache-first: the yearly calendar is fetched once per location and reused for
- * the rest of the year. A cached year is never refetched; if the network is
- * down and nothing is cached, times are computed locally instead.
+ * Overlays whatever Diyanet has supplied for this city onto a locally computed
+ * year.
+ *
+ * Diyanet can only ever return the current month, so a full year from it does
+ * not exist. Rather than leaving eleven months blank, the calculated year is
+ * the base and the official days replace it where they are known. The result
+ * reports how many days are genuinely official so the UI can be honest about
+ * what is on screen.
+ */
+async function buildFromDiyanet(r: CalendarRequest): Promise<YearlyCalendar> {
+  const cityId = r.diyanetCityId!;
+  const today = isoDateIn(Date.now(), r.timezone);
+  const { store, error } = await refreshDiyanetStore(cityId, r.timezone, today);
+
+  const base = computeYear(r);
+  let officialDays = 0;
+  const days = base.days.map((day) => {
+    const official = store.days[day.date];
+    if (!official) return day;
+    officialDays++;
+    // Keep a calculated value for any single time Diyanet omitted.
+    const times = { ...day.times };
+    for (const prayer of PRAYER_KEYS) {
+      if (official[prayer] != null) times[prayer] = official[prayer];
+    }
+    return { date: day.date, times };
+  });
+
+  return {
+    ...base,
+    source: officialDays > 0 ? 'diyanet' : 'calculated',
+    days,
+    officialDays,
+    sourceNote:
+      error ?? (officialDays > 0 ? undefined : 'No Diyanet data cached for this city yet'),
+  };
+}
+
+/**
+ * Cache-first, in source order: Diyanet when it is configured and a city is
+ * chosen, otherwise Aladhan's annual calendar, otherwise local calculation.
+ *
+ * Aladhan's year is fetched once and never refetched. Diyanet is not cached
+ * here at all - it maintains its own accumulating store, because its data
+ * arrives a month at a time and has to be topped up as the year goes on.
  */
 export async function getYearlyCalendar(r: CalendarRequest): Promise<YearlyCalendar> {
+  if (r.diyanetCityId && diyanetConfigured()) {
+    try {
+      return await buildFromDiyanet(r);
+    } catch (error) {
+      console.warn(`[prayer-times] Diyanet failed (${(error as Error).message}).`);
+      // Fall through to Aladhan rather than showing nothing.
+    }
+  }
+
   const cached = await readCache(r);
   if (cached && cached.source === 'aladhan') return cached;
 
