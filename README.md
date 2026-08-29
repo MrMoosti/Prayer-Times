@@ -12,7 +12,10 @@ weather for the configured city.
 | ![Thunderstorm](docs/thunder.webp) | ![Dawn](docs/dawn.webp) |
 
 Built with Next.js (App Router) and no UI framework — the clay look is a small
-set of CSS custom properties and shadows in `app/globals.css`.
+set of CSS custom properties and shadows in `app/globals.css`. Type is
+[Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans) with
+[Amiri](https://fonts.google.com/specimen/Amiri) for the Arabic watermark, both
+self-hosted from npm so the Docker build never reaches for Google Fonts.
 
 ## Running it
 
@@ -211,7 +214,10 @@ driven by real values rather than a time-of-day preset:
 ## Artwork
 
 The layers in `public/scene/` are transparent WebP, generated from SVG authored
-in `scripts/scene-art.mjs`:
+in `scripts/scene-art.mjs`. Three things carry the clay look and are applied to
+every form: a soft two-stop gradient, a blurred highlight where the light
+falls, and a fine `feTurbulence` grain multiplied back over the shape — without
+that last one the art reads as flat vector rather than matte felt.
 
 ```bash
 npm run scene    # writes assets/scene/*.svg and public/scene/*.webp

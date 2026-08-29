@@ -221,9 +221,17 @@
 
 .land__mosque {
   position: absolute;
-  right: 16%;
-  bottom: 26%;
-  width: 40rem;
+  /* Placed so the dome clears the weather chip and the minaret passes just to
+     its left; the reference has an empty top-right corner, this layout does not. */
+  right: 18.5%;
+  bottom: 24%;
+  width: 38rem;
+}
+
+/* The brightness filter belongs on the building, not on the container: applied
+   to the whole group it also dimmed the lit-window overlay to nothing, so the
+   mosque never lit up at night. */
+.land__mosque-base {
   filter: brightness(var(--land-bright, 1));
   transition: filter 2s linear;
 }

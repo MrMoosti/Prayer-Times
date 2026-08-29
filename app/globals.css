@@ -52,9 +52,7 @@ body {
   min-height: 100vh;
   background: var(--page-bg, #f5efe3);
   color: var(--ink, #26382b);
-  font-family:
-    ui-rounded, 'SF Pro Rounded', 'Nunito', 'Quicksand', -apple-system,
-    BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif;
   font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
@@ -78,7 +76,7 @@ button {
 /* --- clay surfaces ------------------------------------------------- */
 
 .clay {
-  border-radius: 3.2rem;
+  border-radius: 3.6rem;
   background: var(--panel);
   box-shadow:
     0 2.4rem 4.8rem -1.6rem var(--clay-shadow),
@@ -186,7 +184,7 @@ button {
 
 .meta__label {
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.15;
 }
 
@@ -251,24 +249,25 @@ button {
 }
 
 .countdown__eyebrow {
-  font-size: 2.3rem;
-  opacity: 0.8;
+  font-size: 2.2rem;
+  font-weight: 400;
+  opacity: 0.82;
   margin: 0 0 0.6rem;
 }
 
 .countdown__name {
-  font-size: 8rem;
-  font-weight: 800;
+  font-size: 7.6rem;
+  font-weight: 600;
   line-height: 1;
   margin: 0;
-  letter-spacing: -0.12rem;
+  letter-spacing: -0.18rem;
 }
 
 .countdown__subtitle {
   color: var(--accent);
-  font-size: 2.6rem;
-  font-weight: 600;
-  margin: 0.8rem 0 0;
+  font-size: 2.5rem;
+  font-weight: 500;
+  margin: 0.9rem 0 0;
 }
 
 .countdown__rule {
@@ -279,17 +278,18 @@ button {
 }
 
 .countdown__label {
-  font-size: 2.5rem;
-  opacity: 0.85;
-  margin: 0 0 1rem;
+  font-size: 2.4rem;
+  font-weight: 400;
+  opacity: 0.86;
+  margin: 0 0 1.1rem;
   position: relative;
 }
 
 .countdown__value {
-  font-size: 13.6rem;
-  font-weight: 800;
+  font-size: 13rem;
+  font-weight: 600;
   line-height: 0.94;
-  letter-spacing: -0.6rem;
+  letter-spacing: -0.35rem;
   font-variant-numeric: tabular-nums;
   position: relative;
 }
@@ -307,8 +307,8 @@ button {
     inset 0 0.2rem 0 rgba(255, 255, 255, 0.16),
     0 1rem 2rem -0.8rem rgba(0, 0, 0, 0.35);
   color: inherit;
-  font-size: 2.2rem;
-  font-weight: 600;
+  font-size: 2.1rem;
+  font-weight: 500;
   width: 60%;
   min-width: 46rem;
   white-space: nowrap;
@@ -352,10 +352,10 @@ button {
 }
 
 .card__title {
-  font-size: 3.2rem;
-  font-weight: 800;
+  font-size: 3rem;
+  font-weight: 600;
   margin: 0;
-  letter-spacing: -0.04rem;
+  letter-spacing: -0.05rem;
 }
 
 .card__action {
@@ -434,14 +434,14 @@ button {
 }
 
 .row__name {
-  font-size: 2.8rem;
-  font-weight: 700;
+  font-size: 2.7rem;
+  font-weight: 500;
   flex: 1;
 }
 
 .row__time {
-  font-size: 2.8rem;
-  font-weight: 700;
+  font-size: 2.7rem;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
@@ -502,14 +502,15 @@ button {
 }
 
 .verse__title {
-  font-size: 2.8rem;
-  font-weight: 700;
-  margin: 0 0 0.8rem;
+  font-size: 2.7rem;
+  font-weight: 600;
+  margin: 0 0 0.9rem;
 }
 
 .verse__text {
-  font-size: 2.4rem;
-  line-height: 1.4;
+  font-size: 2.3rem;
+  font-weight: 400;
+  line-height: 1.42;
   margin: 0;
   max-width: 26ch;
 }
@@ -529,7 +530,7 @@ button {
   opacity: 0.12;
   pointer-events: none;
   user-select: none;
-  font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+  font-family: 'Amiri', 'Noto Naskh Arabic', serif;
 }
 
 /* --- weather chip -------------------------------------------------- */
@@ -548,8 +549,8 @@ button {
 }
 
 .weather__temp {
-  font-size: 2.6rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
@@ -758,7 +759,7 @@ button {
 
 .drawer__title {
   font-size: 3rem;
-  font-weight: 800;
+  font-weight: 600;
   margin: 0;
 }
 
@@ -780,7 +781,7 @@ button {
 
 .field__label {
   font-size: 1.9rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .field__hint {

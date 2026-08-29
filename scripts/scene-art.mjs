@@ -2,343 +2,522 @@
  * Source art for the clay scene.
  *
  * Every layer is authored here as SVG and rasterised to transparent WebP by
- * build-scene.mjs. The clay look comes from three things applied consistently:
- * a soft two-stop gradient across each form, a blurred inner highlight at the
- * top-left, and a wide low-opacity drop shadow. Nothing uses a hard edge.
+ * build-scene.mjs. Three things carry the claymorphic look and are applied
+ * consistently: a soft two-stop gradient across each form, a blurred highlight
+ * where the light falls, and a fine noise grain so surfaces read as matte felt
+ * or pressed paper rather than flat vector. Nothing uses a hard edge.
  */
 
-/** Shared gradient + filter definitions, parameterised per palette. */
-const clayDefs = (id, { light, base, shade, deep }) => `
-  <linearGradient id="${id}-body" x1="0.15" y1="0" x2="0.85" y2="1">
-    <stop offset="0" stop-color="${light}"/>
-    <stop offset="0.55" stop-color="${base}"/>
-    <stop offset="1" stop-color="${shade}"/>
-  </linearGradient>
-  <radialGradient id="${id}-dome" cx="0.34" cy="0.24" r="0.85">
-    <stop offset="0" stop-color="${light}"/>
-    <stop offset="0.5" stop-color="${base}"/>
-    <stop offset="1" stop-color="${deep}"/>
-  </radialGradient>
-  <linearGradient id="${id}-deep" x1="0" y1="0" x2="0.6" y2="1">
-    <stop offset="0" stop-color="${shade}"/>
-    <stop offset="1" stop-color="${deep}"/>
-  </linearGradient>
-  <filter id="${id}-soft" x="-30%" y="-30%" width="160%" height="160%">
-    <feDropShadow dx="6" dy="12" stdDeviation="14" flood-color="${deep}" flood-opacity="0.38"/>
-  </filter>
-  <filter id="${id}-inner" x="-30%" y="-30%" width="160%" height="160%">
-    <feGaussianBlur stdDeviation="9"/>
-  </filter>
-  <filter id="${id}-glow" x="-80%" y="-80%" width="260%" height="260%">
-    <feGaussianBlur stdDeviation="16"/>
+/**
+ * Fine noise multiplied back onto the shape it came from. This is what stops
+ * the art looking like flat vector fills.
+ */
+const grain = (id, { frequency = 0.85, strength = 0.42, seed = 7 } = {}) => `
+  <filter id="${id}" x="-4%" y="-4%" width="108%" height="108%">
+    <feTurbulence type="fractalNoise" baseFrequency="${frequency}" numOctaves="4" seed="${seed}" result="n"/>
+    <feColorMatrix in="n" type="saturate" values="0" result="g"/>
+    <feComponentTransfer in="g" result="a">
+      <feFuncA type="linear" slope="${strength}" intercept="${(-strength / 4).toFixed(3)}"/>
+    </feComponentTransfer>
+    <feComposite in="a" in2="SourceGraphic" operator="in" result="grain"/>
+    <feBlend in="SourceGraphic" in2="grain" mode="multiply"/>
   </filter>`;
 
-const CREAM = { light: '#FDF6E8', base: '#F0E2C8', shade: '#DCC7A4', deep: '#B79E77' };
-const GREEN = { light: '#B9CBA4', base: '#8CA778', shade: '#5F7A50', deep: '#3D5636' };
-const DARKGREEN = { light: '#7E9B6C', base: '#5A7A4C', shade: '#3E5A36', deep: '#283B24' };
-const GOLD = { light: '#FBE6A6', base: '#EFC65C', shade: '#D9A233', deep: '#A97A1E' };
+const softShadow = (id, { dx = 4, dy = 10, blur = 12, color = '#8A7550', opacity = 0.3 } = {}) => `
+  <filter id="${id}" x="-40%" y="-40%" width="180%" height="200%">
+    <feDropShadow dx="${dx}" dy="${dy}" stdDeviation="${blur}" flood-color="${color}" flood-opacity="${opacity}"/>
+  </filter>`;
 
-/* ------------------------------------------------------------------ */
+const blur = (id, deviation) => `
+  <filter id="${id}" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur stdDeviation="${deviation}"/>
+  </filter>`;
+
+/* --- palettes ------------------------------------------------------- */
+
+const CREAM = { light: '#FDF6E7', base: '#EFE1C6', mid: '#E2D0AE', shade: '#CBB48C', deep: '#A98F65' };
+const GOLD = { light: '#FFF0BB', base: '#F5C842', shade: '#E0A62F', deep: '#B47C1B' };
+
+/* ------------------------------------------------------------------ *
+ * Mosque
+ * ------------------------------------------------------------------ */
+
+/** An onion dome: straight-ish shoulders rising to a point. */
+const onionDome = (cx, baseY, halfWidth, height) => {
+  const w = halfWidth;
+  const apex = baseY - height;
+  return `M ${cx - w} ${baseY}
+    C ${cx - w} ${baseY - height * 0.52}, ${cx - w * 0.86} ${baseY - height * 0.82}, ${cx - w * 0.30} ${apex + height * 0.13}
+    C ${cx - w * 0.13} ${apex + height * 0.05}, ${cx - w * 0.05} ${apex + height * 0.02}, ${cx} ${apex}
+    C ${cx + w * 0.05} ${apex + height * 0.02}, ${cx + w * 0.13} ${apex + height * 0.05}, ${cx + w * 0.30} ${apex + height * 0.13}
+    C ${cx + w * 0.86} ${baseY - height * 0.82}, ${cx + w} ${baseY - height * 0.52}, ${cx + w} ${baseY} Z`;
+};
+
+/** A pointed arch, used for every window and doorway. */
+const pointedArch = (cx, baseY, halfWidth, height) => {
+  const w = halfWidth;
+  const apex = baseY - height;
+  return `M ${cx - w} ${baseY}
+    L ${cx - w} ${baseY - height * 0.52}
+    C ${cx - w} ${apex + height * 0.16}, ${cx - w * 0.5} ${apex}, ${cx} ${apex}
+    C ${cx + w * 0.5} ${apex}, ${cx + w} ${apex + height * 0.16}, ${cx + w} ${baseY - height * 0.52}
+    L ${cx + w} ${baseY} Z`;
+};
+
+const crescent = (cx, cy, r) => `
+  <path d="M ${cx} ${cy - r}
+    a ${r} ${r} 0 1 0 ${r * 0.72} ${r * 1.72}
+    a ${r * 0.8} ${r * 0.8} 0 1 1 ${-r * 0.72} ${-r * 1.72} Z" fill="url(#gold-body)"/>`;
+
+const WINDOWS = [
+  // cx, baseY, halfWidth, height
+  [384, 700, 48, 156],
+  [252, 700, 34, 108],
+  [516, 700, 34, 108],
+  [779, 330, 17, 60],
+];
 
 export const mosque = () => `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" width="900" height="760">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 780" width="900" height="780">
   <defs>
-    ${clayDefs('m', CREAM)}
-    ${clayDefs('g', GOLD)}
-    <linearGradient id="window-lit" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#B9A382"/>
-      <stop offset="1" stop-color="#8C7355"/>
+    ${grain('m-grain', { frequency: 0.9, strength: 0.4, seed: 3 })}
+    ${softShadow('m-shadow', { dx: 5, dy: 12, blur: 14, color: '#96805A', opacity: 0.34 })}
+    ${blur('m-soft', 10)}
+    <linearGradient id="wall" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="${CREAM.light}"/>
+      <stop offset="0.5" stop-color="${CREAM.base}"/>
+      <stop offset="1" stop-color="${CREAM.shade}"/>
+    </linearGradient>
+    <radialGradient id="dome" cx="0.33" cy="0.2" r="0.9">
+      <stop offset="0" stop-color="#FFFBF0"/>
+      <stop offset="0.45" stop-color="${CREAM.base}"/>
+      <stop offset="1" stop-color="${CREAM.deep}"/>
+    </radialGradient>
+    <linearGradient id="recess" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7E6544"/>
+      <stop offset="1" stop-color="#A98C63"/>
+    </linearGradient>
+    <linearGradient id="gold-body" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="${GOLD.light}"/>
+      <stop offset="0.55" stop-color="${GOLD.base}"/>
+      <stop offset="1" stop-color="${GOLD.deep}"/>
     </linearGradient>
   </defs>
 
-  <g filter="url(#m-soft)">
-    <!-- main hall -->
-    <rect x="150" y="430" width="470" height="300" rx="30" fill="url(#m-body)"/>
-    <!-- side wings -->
-    <rect x="96" y="520" width="80" height="210" rx="26" fill="url(#m-deep)" opacity="0.85"/>
-    <rect x="600" y="520" width="86" height="210" rx="26" fill="url(#m-deep)" opacity="0.85"/>
+  <g filter="url(#m-shadow)">
+    <g filter="url(#m-grain)">
+      <!-- prayer hall -->
+      <rect x="150" y="452" width="470" height="298" rx="26" fill="url(#wall)"/>
+      <!-- side wings, set back -->
+      <rect x="96" y="546" width="76" height="204" rx="22" fill="${CREAM.mid}"/>
+      <rect x="600" y="546" width="82" height="204" rx="22" fill="${CREAM.mid}"/>
 
-    <!-- drum + main dome -->
-    <rect x="270" y="368" width="228" height="80" rx="22" fill="url(#m-body)"/>
-    <path d="M384 150 C 512 150 552 268 552 372 L 216 372 C 216 268 256 150 384 150 Z" fill="url(#m-dome)"/>
-    <!-- dome highlight -->
-    <path d="M330 200 C 300 246 288 300 288 350" stroke="#FFFBF0" stroke-opacity="0.55" stroke-width="26"
-          stroke-linecap="round" fill="none" filter="url(#m-inner)"/>
-    <!-- dome underside shade -->
-    <path d="M470 210 C 512 262 524 320 524 366 L 470 366 Z" fill="${CREAM.deep}" opacity="0.22" filter="url(#m-inner)"/>
+      <!-- drum and main dome -->
+      <rect x="276" y="392" width="216" height="72" rx="18" fill="url(#wall)"/>
+      <path d="${onionDome(384, 396, 168, 232)}" fill="url(#dome)"/>
+      <!-- side dome -->
+      <path d="${onionDome(188, 476, 62, 88)}" fill="url(#dome)"/>
+      <rect x="140" y="470" width="96" height="26" rx="12" fill="url(#wall)"/>
 
-    <!-- small domes -->
-    <path d="M188 452 C 232 452 246 494 246 524 L 130 524 C 130 494 144 452 188 452 Z" fill="url(#m-dome)"/>
-    <path d="M642 452 C 686 452 700 494 700 524 L 584 524 C 584 494 598 452 642 452 Z" fill="url(#m-dome)"/>
+      <!-- minaret: shaft, balcony, upper shaft, cap -->
+      <rect x="750" y="286" width="60" height="464" rx="20" fill="url(#wall)"/>
+      <rect x="736" y="372" width="88" height="30" rx="14" fill="${CREAM.mid}"/>
+      <rect x="740" y="366" width="80" height="10" rx="5" fill="${CREAM.light}" opacity="0.8"/>
+      <rect x="762" y="214" width="36" height="80" rx="14" fill="url(#wall)"/>
+      <path d="M 780 92 L 818 220 L 742 220 Z" fill="url(#dome)"/>
+    </g>
 
-    <!-- minaret -->
-    <rect x="742" y="230" width="74" height="500" rx="26" fill="url(#m-body)"/>
-    <rect x="730" y="352" width="98" height="34" rx="16" fill="url(#m-deep)"/>
-    <path d="M779 96 L 828 236 L 730 236 Z" fill="url(#m-dome)"/>
-    <rect x="762" y="252" width="34" height="84" rx="16" fill="${CREAM.deep}" opacity="0.28"/>
+    <!-- dome highlight and underside shade, kept out of the grain pass -->
+    <path d="M 322 232 C 292 288, 280 344, 280 392" stroke="#FFFCF3" stroke-opacity="0.6"
+          stroke-width="30" stroke-linecap="round" fill="none" filter="url(#m-soft)"/>
+    <path d="M 462 244 C 496 300, 502 350, 502 392 L 452 392 Z"
+          fill="${CREAM.deep}" opacity="0.22" filter="url(#m-soft)"/>
+    <path d="M 168 500 C 158 520, 154 540, 154 552" stroke="#FFFCF3" stroke-opacity="0.5"
+          stroke-width="14" stroke-linecap="round" fill="none" filter="url(#m-soft)"/>
+    <rect x="758" y="300" width="14" height="420" rx="7" fill="#FFFCF3" opacity="0.4" filter="url(#m-soft)"/>
   </g>
 
-  <!-- arched openings; these are the windows that light up at night -->
+  <!-- recessed openings; the glow layer lights these at night -->
   <g id="windows">
-    <path d="M385 520 C 425 520 442 552 442 588 L 442 700 L 328 700 L 328 588 C 328 552 345 520 385 520 Z" fill="url(#window-lit)"/>
-    <path d="M232 592 C 258 592 270 614 270 638 L 270 700 L 194 700 L 194 638 C 194 614 206 592 232 592 Z" fill="url(#window-lit)"/>
-    <path d="M540 592 C 566 592 578 614 578 638 L 578 700 L 502 700 L 502 638 C 502 614 514 592 540 592 Z" fill="url(#window-lit)"/>
-    <path d="M779 268 C 792 268 798 280 798 294 L 798 330 L 760 330 L 760 294 C 760 280 766 268 779 268 Z" fill="url(#window-lit)"/>
+    ${WINDOWS.map(([cx, y, w, h]) => `<path d="${pointedArch(cx, y, w, h)}" fill="url(#recess)"/>`).join('\n    ')}
+  </g>
+  <g fill="none" stroke="${CREAM.light}" stroke-opacity="0.55" stroke-width="5">
+    ${WINDOWS.map(([cx, y, w, h]) => `<path d="${pointedArch(cx, y, w, h)}"/>`).join('\n    ')}
   </g>
 
-  <!-- finials -->
-  <g fill="url(#g-body)" filter="url(#g-soft)">
-    <path d="M384 92 a30 30 0 1 0 26 45 a24 24 0 1 1 -20 -37 a30 30 0 0 1 -6 -8 Z"/>
-    <path d="M779 44 a22 22 0 1 0 19 33 a18 18 0 1 1 -15 -27 a22 22 0 0 1 -4 -6 Z"/>
-  </g>
+  ${crescent(384, 150, 30)}
+  ${crescent(780, 62, 21)}
 </svg>`;
 
-/** Just the lit windows, drawn again so they can be glowed on top at night. */
-export const mosqueGlow = () => {
-  const full = mosque();
-  const windows = full.slice(full.indexOf('<g id="windows">'), full.indexOf('<!-- finials -->'));
-  return `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" width="900" height="760">
+/** Just the openings, drawn again so they can be bloomed on top at night. */
+export const mosqueGlow = () => `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 780" width="900" height="780">
   <defs>
-    <linearGradient id="window-lit" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FFF0BE"/>
-      <stop offset="1" stop-color="#F2B13F"/>
+    <linearGradient id="lit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF1C4"/>
+      <stop offset="1" stop-color="#F0AE3E"/>
     </linearGradient>
-    <filter id="bloom" x="-120%" y="-120%" width="340%" height="340%">
-      <feGaussianBlur stdDeviation="22"/>
-    </filter>
+    ${blur('bloom', 20)}
   </defs>
-  <g opacity="0.85" filter="url(#bloom)">${windows}</g>
-  ${windows}
+  <g opacity="0.8" filter="url(#bloom)">
+    ${WINDOWS.map(([cx, y, w, h]) => `<path d="${pointedArch(cx, y, w, h)}" fill="url(#lit)"/>`).join('\n    ')}
+  </g>
+  ${WINDOWS.map(([cx, y, w, h]) => `<path d="${pointedArch(cx, y, w, h)}" fill="url(#lit)"/>`).join('\n  ')}
 </svg>`;
-};
+
+/* ------------------------------------------------------------------ *
+ * Hills and trees
+ * ------------------------------------------------------------------ */
 
 /**
- * A clump of rounded treetops sitting on the ridge. They are deliberately two
- * steps darker than the hill they stand on, otherwise the whole band reads as
- * one flat silhouette at a distance.
+ * A single tree: a short trunk under a canopy built from overlapping lobes,
+ * lit from the top left. Drawn small and repeated rather than stamped from one
+ * shape, so a row of them does not read as a pattern.
  */
-const treeCluster = (x, y, scale, tree, seed, count = 6) => {
-  const r = (n) => ((Math.sin(seed * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1;
-  let out = '';
-  for (let i = 0; i < count; i++) {
-    const tx = x + (r(i) - 0.5) * 190 * scale;
-    const rad = (30 + r(i + 3) * 26) * scale;
-    // Sit each canopy on the ridge rather than floating above it.
-    const ty = y - rad * 0.55 + (r(i + 9) - 0.5) * 14 * scale;
-    out += `<ellipse cx="${tx.toFixed(1)}" cy="${(ty + rad * 0.72).toFixed(1)}" rx="${(rad * 0.9).toFixed(1)}" ry="${(rad * 0.3).toFixed(1)}" fill="${tree.deep}" opacity="0.28"/>`;
-    out += `<ellipse cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" rx="${(rad * 0.92).toFixed(1)}" ry="${rad.toFixed(1)}" fill="${tree.base}"/>`;
-    out += `<ellipse cx="${(tx - rad * 0.28).toFixed(1)}" cy="${(ty - rad * 0.34).toFixed(1)}" rx="${(rad * 0.46).toFixed(1)}" ry="${(rad * 0.4).toFixed(1)}" fill="${tree.light}" opacity="0.6"/>`;
-    out += `<ellipse cx="${(tx + rad * 0.34).toFixed(1)}" cy="${(ty + rad * 0.3).toFixed(1)}" rx="${(rad * 0.4).toFixed(1)}" ry="${(rad * 0.34).toFixed(1)}" fill="${tree.shade}" opacity="0.45"/>`;
-  }
-  return out;
+const tree = (x, groundY, scale, p, seed) => {
+  const rnd = (n) => {
+    const v = Math.sin(seed * 12.9898 + n * 78.233) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  const h = (34 + rnd(1) * 16) * scale;
+  const w = h * (0.72 + rnd(2) * 0.16);
+  const trunkH = h * 0.3;
+  const cy = groundY - trunkH - h * 0.52;
+  const f = (n) => n.toFixed(1);
+
+  return `
+    <ellipse cx="${f(x)}" cy="${f(groundY)}" rx="${f(w * 0.85)}" ry="${f(h * 0.1)}" fill="${p.deep}" opacity="0.22"/>
+    <rect x="${f(x - w * 0.09)}" y="${f(groundY - trunkH - 2)}" width="${f(w * 0.18)}" height="${f(trunkH + 4)}" rx="${f(w * 0.09)}" fill="${p.trunk}"/>
+    <ellipse cx="${f(x)}" cy="${f(cy + h * 0.2)}" rx="${f(w * 0.62)}" ry="${f(h * 0.42)}" fill="${p.base}"/>
+    <ellipse cx="${f(x - w * 0.4)}" cy="${f(cy + h * 0.16)}" rx="${f(w * 0.4)}" ry="${f(h * 0.32)}" fill="${p.base}"/>
+    <ellipse cx="${f(x + w * 0.4)}" cy="${f(cy + h * 0.2)}" rx="${f(w * 0.38)}" ry="${f(h * 0.3)}" fill="${p.shade}"/>
+    <ellipse cx="${f(x)}" cy="${f(cy - h * 0.14)}" rx="${f(w * 0.5)}" ry="${f(h * 0.36)}" fill="${p.base}"/>
+    <ellipse cx="${f(x - w * 0.22)}" cy="${f(cy - h * 0.24)}" rx="${f(w * 0.3)}" ry="${f(h * 0.22)}" fill="${p.light}"/>
+    <ellipse cx="${f(x + w * 0.26)}" cy="${f(cy + h * 0.06)}" rx="${f(w * 0.24)}" ry="${f(h * 0.18)}" fill="${p.shade}" opacity="0.8"/>`;
 };
 
 /**
- * Three hill bands. Back is hazy and pale, front is saturated and carries the
- * trees; the parallax in the scene component moves them at different rates.
+ * Three hill bands on a tight 1600x220 artboard: the ridge sits near the top of
+ * the frame so the band can be laid low on the screen without cropping the
+ * hilltops away. Back is hazy and pale, front is saturated and carries the
+ * larger trees; the scene component moves them at different rates.
  */
 export const hills = (depth) => {
-  const palettes = {
-    back: { light: '#CBD9BA', base: '#AFC49B', shade: '#8FAA7C', deep: '#6B855C' },
-    mid: { light: '#AFC698', base: '#8FAC77', shade: '#6C8C59', deep: '#4E6B40' },
-    front: { light: '#8FAC76', base: '#6C8C56', shade: '#4C6C3D', deep: '#33512A' },
-  };
-  const trees = {
-    back: { light: '#9FB98C', base: '#7E9C6C', shade: '#5F7D51', deep: '#43603A' },
-    mid: { light: '#84A46F', base: '#628A50', shade: '#456A38', deep: '#2E4B26' },
-    front: { light: '#638C4D', base: '#456B34', shade: '#2F4F25', deep: '#1D371A' },
-  };
-  const p = palettes[depth];
-  const t = trees[depth];
-  // A tight 1600x220 artboard: the ridge sits near the top of the frame so the
-  // band can be laid low on the screen without cropping the hilltops away.
+  const hill = {
+    back: { light: '#D3DFC2', base: '#BCCDA6', shade: '#A2B78B', deep: '#7E946B' },
+    mid: { light: '#BDCFA4', base: '#A2B889', shade: '#88A06E', deep: '#65804F' },
+    front: { light: '#A6BC8A', base: '#8AA46E', shade: '#6E8B54', deep: '#4E6A39' },
+  }[depth];
+
+  const foliage = {
+    back: { light: '#A9BF8E', base: '#8CA772', shade: '#71905A', deep: '#556F42', trunk: '#9A8763' },
+    mid: { light: '#94AE76', base: '#77935B', shade: '#5E7C46', deep: '#425C31', trunk: '#8B7856' },
+    front: { light: '#7E9A5F', base: '#5F7F45', shade: '#496935', deep: '#2F4B22', trunk: '#7A6848' },
+  }[depth];
+
   const shapes = {
     back: 'M0 88 C 180 40 330 56 470 76 C 620 98 760 46 960 60 C 1160 74 1330 42 1600 66 L 1600 220 L 0 220 Z',
     mid: 'M0 112 C 220 62 340 96 520 112 C 700 128 830 82 1020 96 C 1210 110 1400 74 1600 98 L 1600 220 L 0 220 Z',
     front: 'M0 142 C 240 100 420 132 640 142 C 860 152 1060 118 1290 134 C 1420 142 1520 136 1600 130 L 1600 220 L 0 220 Z',
   };
-  // Sparse and small: the hills read as a calm backdrop, and the header text
-  // sitting over them stays legible.
-  const treeRows = {
-    back: [[300, 62, 0.26, 1], [900, 58, 0.28, 3], [1330, 48, 0.26, 11]],
-    mid: [[420, 96, 0.36, 4], [1000, 104, 0.38, 6], [1500, 92, 0.34, 12]],
-    front: [[210, 126, 0.46, 7], [700, 148, 0.5, 8], [1180, 142, 0.46, 9], [1560, 132, 0.44, 10]],
+
+  // x, ground y on the ridge, scale, seed
+  const rows = {
+    back: [
+      [150, 80, 0.36, 1], [190, 86, 0.3, 21], [520, 92, 0.34, 2], [900, 68, 0.36, 3],
+      [940, 74, 0.29, 31], [1290, 54, 0.33, 11], [1424, 62, 0.3, 41],
+    ],
+    mid: [
+      [300, 96, 0.56, 4], [348, 104, 0.46, 22], [742, 122, 0.6, 5], [796, 128, 0.48, 32],
+      [1120, 104, 0.55, 6], [1172, 110, 0.45, 42], [1500, 92, 0.52, 12],
+    ],
+    front: [
+      [180, 132, 1, 7], [246, 140, 0.82, 23], [560, 148, 1.04, 8], [634, 152, 0.86, 33],
+      [1000, 148, 0.96, 9], [1068, 152, 0.8, 43], [1420, 136, 0.92, 10], [1486, 140, 0.76, 53],
+    ],
   };
+
   return `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 220" width="1600" height="220">
   <defs>
-    <linearGradient id="h" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="${p.light}"/>
-      <stop offset="0.45" stop-color="${p.base}"/>
-      <stop offset="1" stop-color="${p.shade}"/>
+    ${grain(`h-grain-${depth}`, { frequency: 1.1, strength: 0.34, seed: depth.length * 5 })}
+    <linearGradient id="h-${depth}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${hill.light}"/>
+      <stop offset="0.4" stop-color="${hill.base}"/>
+      <stop offset="1" stop-color="${hill.shade}"/>
     </linearGradient>
-    <filter id="hs" x="-10%" y="-60%" width="120%" height="240%">
-      <feDropShadow dx="0" dy="-5" stdDeviation="8" flood-color="${p.deep}" flood-opacity="0.3"/>
+    <filter id="h-shadow-${depth}" x="-10%" y="-60%" width="120%" height="240%">
+      <feDropShadow dx="0" dy="-4" stdDeviation="7" flood-color="${hill.deep}" flood-opacity="0.28"/>
     </filter>
   </defs>
-  <path d="${shapes[depth]}" fill="url(#h)" filter="url(#hs)"/>
-  <!-- rim light along the ridge, the way light catches the top of a clay slab -->
-  <path d="${shapes[depth]}" fill="none" stroke="${p.light}" stroke-width="6" opacity="0.6"/>
-  <g>
-    ${treeRows[depth].map(([x, y, s, seed]) => treeCluster(x, y, s, t, seed)).join('')}
+
+  <g filter="url(#h-grain-${depth})">
+    <path d="${shapes[depth]}" fill="url(#h-${depth})" filter="url(#h-shadow-${depth})"/>
+    <!-- rim light along the ridge, the way light catches a folded paper edge -->
+    <path d="${shapes[depth]}" fill="none" stroke="${hill.light}" stroke-width="5" opacity="0.7"/>
+    ${rows[depth].map(([x, y, s, seed]) => tree(x, y, s, foliage, seed)).join('')}
   </g>
 </svg>`;
 };
+
+/* ------------------------------------------------------------------ *
+ * Sky
+ * ------------------------------------------------------------------ */
 
 /** Puffy clay clouds; four silhouettes so the sky never looks tiled. */
 export const cloud = (variant) => {
   const lumps = [
-    [[70, 78, 56], [140, 62, 68], [214, 76, 50], [150, 96, 62]],
-    [[80, 84, 48], [148, 60, 62], [206, 70, 44], [258, 86, 38]],
-    [[64, 74, 44], [124, 58, 58], [188, 72, 46]],
-    [[90, 90, 60], [170, 66, 74], [252, 84, 54], [316, 92, 40]],
+    [[74, 80, 54], [142, 62, 68], [214, 78, 50], [152, 98, 60]],
+    [[82, 86, 46], [148, 60, 62], [206, 72, 44], [258, 88, 38]],
+    [[66, 76, 44], [124, 58, 58], [188, 74, 46]],
+    [[92, 92, 58], [172, 66, 74], [252, 86, 52], [316, 94, 40]],
   ][variant];
   const width = Math.max(...lumps.map(([x, , r]) => x + r)) + 40;
-  const body = lumps
-    .map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`)
-    .join('');
+  const body = lumps.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('');
   const highlight = lumps
-    .map(([x, y, r]) => `<circle cx="${x - r * 0.22}" cy="${y - r * 0.3}" r="${r * 0.62}"/>`)
+    .map(([x, y, r]) => `<circle cx="${x - r * 0.24}" cy="${y - r * 0.32}" r="${r * 0.58}"/>`)
     .join('');
+  const underside = lumps
+    .map(([x, y, r]) => `<circle cx="${x + r * 0.16}" cy="${y + r * 0.34}" r="${r * 0.52}"/>`)
+    .join('');
+
   return `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} 170" width="${width}" height="170">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} 175" width="${width}" height="175">
   <defs>
-    <linearGradient id="c" x1="0.2" y1="0" x2="0.6" y2="1">
+    ${grain(`c-grain-${variant}`, { frequency: 1.05, strength: 0.3, seed: variant + 2 })}
+    ${softShadow(`c-shadow-${variant}`, { dx: 2, dy: 9, blur: 10, color: '#93856F', opacity: 0.28 })}
+    ${blur(`c-soft-${variant}`, 11)}
+    <linearGradient id="c-body-${variant}" x1="0.25" y1="0" x2="0.6" y2="1">
       <stop offset="0" stop-color="#FFFFFF"/>
-      <stop offset="0.6" stop-color="#F4EEE2"/>
-      <stop offset="1" stop-color="#DED4C2"/>
+      <stop offset="0.55" stop-color="#FBF6EB"/>
+      <stop offset="1" stop-color="#E6DCC8"/>
     </linearGradient>
-    <filter id="cs" x="-40%" y="-40%" width="180%" height="200%">
-      <feDropShadow dx="2" dy="10" stdDeviation="10" flood-color="#8E8271" flood-opacity="0.3"/>
-    </filter>
-    <filter id="cb" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="10"/>
-    </filter>
   </defs>
-  <g filter="url(#cs)" fill="url(#c)">${body}
-    <rect x="30" y="88" width="${width - 70}" height="60" rx="30"/>
+  <g filter="url(#c-shadow-${variant})">
+    <g filter="url(#c-grain-${variant})" fill="url(#c-body-${variant})">
+      ${body}
+      <rect x="30" y="90" width="${width - 70}" height="58" rx="29"/>
+    </g>
   </g>
-  <g fill="#FFFFFF" opacity="0.55" filter="url(#cb)">${highlight}</g>
+  <g fill="#FFFFFF" opacity="0.6" filter="url(#c-soft-${variant})">${highlight}</g>
+  <g fill="#CFC3AC" opacity="0.3" filter="url(#c-soft-${variant})">${underside}</g>
 </svg>`;
 };
 
-export const sun = () => `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 420" width="420" height="420">
+/**
+ * The sun: a matte disc behind a wheel of long, fine, tapering rays. The
+ * reference has far more of them, and far thinner, than a chunky sunburst.
+ */
+export const sun = () => {
+  const cx = 300;
+  const cy = 300;
+  const rays = Array.from({ length: 32 }, (_, i) => {
+    const a = (i / 32) * Math.PI * 2;
+    const long = i % 2 === 0;
+    const inner = 132;
+    const outer = long ? 282 : 236;
+    const halfWidth = long ? 0.0075 : 0.006;
+    const p = (radius, offset) => [
+      (cx + Math.cos(a + offset) * radius).toFixed(1),
+      (cy + Math.sin(a + offset) * radius).toFixed(1),
+    ];
+    const [x1, y1] = p(inner, -halfWidth * 3);
+    const [x2, y2] = p(inner, halfWidth * 3);
+    const [x3, y3] = p(outer, halfWidth);
+    const [x4, y4] = p(outer, -halfWidth);
+    return `<path d="M ${x1} ${y1} L ${x2} ${y2} L ${x3} ${y3} L ${x4} ${y4} Z"/>`;
+  }).join('');
+
+  return `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
   <defs>
-    ${clayDefs('s', GOLD)}
-    <radialGradient id="s-face" cx="0.36" cy="0.3" r="0.8">
-      <stop offset="0" stop-color="#FFF3C4"/>
-      <stop offset="0.5" stop-color="#F5CB5C"/>
-      <stop offset="1" stop-color="#DFA531"/>
+    ${grain('s-grain', { frequency: 0.95, strength: 0.36, seed: 9 })}
+    ${softShadow('s-shadow', { dx: 0, dy: 10, blur: 16, color: '#C79A2A', opacity: 0.34 })}
+    ${blur('s-soft', 16)}
+    <radialGradient id="s-face" cx="0.34" cy="0.28" r="0.85">
+      <stop offset="0" stop-color="#FFF4CD"/>
+      <stop offset="0.5" stop-color="${GOLD.base}"/>
+      <stop offset="1" stop-color="${GOLD.shade}"/>
     </radialGradient>
+    <linearGradient id="s-ray" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F8D66A"/>
+      <stop offset="1" stop-color="#EFC047"/>
+    </linearGradient>
   </defs>
-  <g filter="url(#s-soft)">
-    ${Array.from({ length: 16 }, (_, i) => {
-      const a = (i / 16) * Math.PI * 2;
-      const x1 = 210 + Math.cos(a) * 138;
-      const y1 = 210 + Math.sin(a) * 138;
-      const x2 = 210 + Math.cos(a) * 196;
-      const y2 = 210 + Math.sin(a) * 196;
-      return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#F2CF74" stroke-width="13" stroke-linecap="round" opacity="0.85"/>`;
-    }).join('')}
-    <circle cx="210" cy="210" r="132" fill="url(#s-face)"/>
-    <ellipse cx="168" cy="166" rx="52" ry="44" fill="#FFF8DC" opacity="0.5" filter="url(#s-inner)"/>
+
+  <g fill="url(#s-ray)" opacity="0.9">${rays}</g>
+  <g filter="url(#s-shadow)">
+    <circle cx="${cx}" cy="${cy}" r="128" fill="url(#s-face)" filter="url(#s-grain)"/>
   </g>
+  <ellipse cx="${cx - 42}" cy="${cy - 46}" rx="50" ry="42" fill="#FFF9DE" opacity="0.5" filter="url(#s-soft)"/>
 </svg>`;
+};
 
 export const moon = () => `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" width="360" height="360">
   <defs>
-    <radialGradient id="mn" cx="0.34" cy="0.28" r="0.85">
-      <stop offset="0" stop-color="#FFFBEF"/>
-      <stop offset="0.55" stop-color="#F1E6CE"/>
-      <stop offset="1" stop-color="#CDBE9E"/>
+    ${grain('mn-grain', { frequency: 1, strength: 0.3, seed: 5 })}
+    ${blur('mn-soft', 7)}
+    <radialGradient id="mn-face" cx="0.34" cy="0.28" r="0.85">
+      <stop offset="0" stop-color="#FFFCF2"/>
+      <stop offset="0.55" stop-color="#F2E7D0"/>
+      <stop offset="1" stop-color="#CDBEA0"/>
     </radialGradient>
-    <filter id="mn-s" x="-60%" y="-60%" width="220%" height="220%">
+    <filter id="mn-shadow" x="-60%" y="-60%" width="220%" height="220%">
       <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#0B1622" flood-opacity="0.5"/>
     </filter>
-    <filter id="mn-b" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="7"/>
-    </filter>
   </defs>
-  <g filter="url(#mn-s)">
-    <circle cx="180" cy="180" r="128" fill="url(#mn)"/>
-    <g fill="#D9CBAC" opacity="0.55" filter="url(#mn-b)">
+  <g filter="url(#mn-shadow)">
+    <circle cx="180" cy="180" r="128" fill="url(#mn-face)" filter="url(#mn-grain)"/>
+    <g fill="#D8C9A9" opacity="0.5" filter="url(#mn-soft)">
       <circle cx="146" cy="152" r="26"/>
       <circle cx="214" cy="206" r="19"/>
       <circle cx="160" cy="228" r="14"/>
       <circle cx="226" cy="140" r="11"/>
     </g>
-    <ellipse cx="142" cy="140" rx="42" ry="34" fill="#FFFDF6" opacity="0.5" filter="url(#mn-b)"/>
+    <ellipse cx="142" cy="140" rx="42" ry="34" fill="#FFFEF8" opacity="0.5" filter="url(#mn-soft)"/>
   </g>
 </svg>`;
 
-/** The mihrab relief pressed into the countdown card. */
-export const arch = () => `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 560" width="420" height="560">
+/* ------------------------------------------------------------------ *
+ * Card ornaments
+ * ------------------------------------------------------------------ */
+
+/**
+ * The mihrab relief pressed into the countdown card.
+ *
+ * It has no colour of its own: it is highlight and shadow only, so it takes the
+ * colour of whatever it is laid over. An ogee arch over a panel of eight-point
+ * stars, on a stepped plinth.
+ */
+export const arch = () => {
+  // A true ogee: shoulders that rise, turn concave, and meet at a point.
+  const outer = `M 62 512 L 62 300
+    C 62 212, 94 148, 148 126
+    C 188 110, 208 88, 214 28
+    C 220 88, 240 110, 280 126
+    C 334 148, 366 212, 366 300
+    L 366 512 Z`;
+  const inner = `M 100 484 L 100 308
+    C 100 234, 126 180, 170 160
+    C 199 147, 210 120, 214 74
+    C 218 120, 229 147, 258 160
+    C 302 180, 328 234, 328 308
+    L 328 484 Z`;
+
+  // Eight-point stars from two overlapping squares - the traditional khatam
+  // construction - tiled across the panel. Coarse and faint: at this size a
+  // fine grid reads as mesh rather than as a carved pattern.
+  const step = 58;
+  const half = 28;
+  const lattice = [];
+  for (let row = 0; row < 7; row++) {
+    for (let col = 0; col < 5; col++) {
+      const cx = 100 + col * step;
+      const cy = 150 + row * step;
+      lattice.push(
+        `<rect x="${cx - half}" y="${cy - half}" width="${half * 2}" height="${half * 2}"/>`,
+        `<rect x="${cx - half}" y="${cy - half}" width="${half * 2}" height="${half * 2}" transform="rotate(45 ${cx} ${cy})"/>`,
+      );
+    }
+  }
+
+  return `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 428 560" width="428" height="560">
   <defs>
-    <linearGradient id="a-body" x1="0.2" y1="0" x2="0.8" y2="1">
+    ${blur('a-soft', 3)}
+    ${blur('a-wide', 8)}
+    <clipPath id="a-panel"><path d="${inner}"/></clipPath>
+    <linearGradient id="a-face" x1="0.15" y1="0" x2="0.85" y2="1">
       <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.14"/>
+      <stop offset="0.55" stop-color="#FFFFFF" stop-opacity="0.02"/>
       <stop offset="1" stop-color="#000000" stop-opacity="0.16"/>
     </linearGradient>
-    <filter id="a-emb" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="3"/>
-    </filter>
-  </defs>
-  <g>
-    <rect x="40" y="500" width="340" height="46" rx="18" fill="url(#a-body)"/>
-    <rect x="66" y="462" width="288" height="42" rx="16" fill="url(#a-body)"/>
-    <path d="M210 44 C 300 44 336 116 336 196 L 336 470 L 84 470 L 84 196 C 84 116 120 44 210 44 Z"
-          fill="url(#a-body)"/>
-    <path d="M210 96 C 278 96 300 152 300 208 L 300 440 L 120 440 L 120 208 C 120 152 142 96 210 96 Z"
-          fill="#000000" opacity="0.1"/>
-    <path d="M210 96 C 278 96 300 152 300 208 L 300 440 L 120 440 L 120 208 C 120 152 142 96 210 96 Z"
-          fill="none" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="3" filter="url(#a-emb)"/>
-    <!-- eight-point star lattice -->
-    <g stroke="#FFFFFF" stroke-opacity="0.13" stroke-width="3" fill="none">
-      ${Array.from({ length: 4 }, (_, row) =>
-        Array.from({ length: 3 }, (_, col) => {
-          const cx = 150 + col * 60;
-          const cy = 180 + row * 62;
-          return `<rect x="${cx - 21}" y="${cy - 21}" width="42" height="42" transform="rotate(45 ${cx} ${cy})"/><rect x="${cx - 21}" y="${cy - 21}" width="42" height="42"/>`;
-        }).join(''),
-      ).join('')}
-    </g>
-  </g>
-</svg>`;
-
-export const plant = () => `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400" width="320" height="400">
-  <defs>
-    ${clayDefs('p', CREAM)}
-    <linearGradient id="leaf" x1="0.2" y1="0" x2="0.8" y2="1">
-      <stop offset="0" stop-color="#A9C48F"/>
-      <stop offset="0.55" stop-color="#7D9E68"/>
-      <stop offset="1" stop-color="#4F7043"/>
+    <linearGradient id="a-step" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.13"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.15"/>
     </linearGradient>
   </defs>
-  <g filter="url(#p-soft)">
-    <g fill="url(#leaf)">
-      <path d="M160 210 C 96 196 62 138 78 78 C 140 84 176 132 168 200 Z"/>
-      <path d="M168 214 C 232 196 268 142 250 84 C 190 92 156 142 164 206 Z"/>
-      <path d="M162 216 C 116 250 74 244 50 206 C 92 176 140 180 160 210 Z"/>
-      <path d="M168 220 C 214 252 258 246 282 208 C 240 178 190 184 170 214 Z"/>
-      <path d="M164 216 C 158 156 176 108 210 74 C 226 128 210 186 172 218 Z" opacity="0.9"/>
+
+  <!-- plinth -->
+  <rect x="26" y="516" width="376" height="34" rx="14" fill="url(#a-step)"/>
+  <rect x="52" y="486" width="324" height="32" rx="13" fill="url(#a-step)"/>
+
+  <!-- arch face, raised -->
+  <path d="${outer}" fill="url(#a-face)"/>
+  <path d="${outer}" fill="none" stroke="#FFFFFF" stroke-opacity="0.17" stroke-width="3" filter="url(#a-soft)"/>
+
+  <!-- recessed panel: dark fill, soft inner shadow, light lower lip -->
+  <path d="${inner}" fill="#000000" opacity="0.12"/>
+  <path d="${inner}" fill="none" stroke="#000000" stroke-opacity="0.22" stroke-width="9" filter="url(#a-wide)"/>
+  <path d="${inner}" fill="none" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="2.5"/>
+
+  <!-- lattice, clipped to the panel -->
+  <g clip-path="url(#a-panel)">
+    <g fill="none" stroke="#000000" stroke-opacity="0.13" stroke-width="3" transform="translate(0,2)">
+      ${lattice.join('')}
     </g>
-    <path d="M96 268 L 224 268 L 206 372 C 204 386 194 394 180 394 L 140 394 C 126 394 116 386 114 372 Z" fill="url(#p-body)"/>
-    <rect x="84" y="248" width="152" height="34" rx="16" fill="url(#p-dome)"/>
-    <path d="M116 286 C 110 320 112 350 120 378" stroke="#FFFDF4" stroke-opacity="0.5" stroke-width="14"
-          stroke-linecap="round" fill="none" filter="url(#p-inner)"/>
+    <g fill="none" stroke="#FFFFFF" stroke-opacity="0.11" stroke-width="2.2">
+      ${lattice.join('')}
+    </g>
   </g>
 </svg>`;
+};
+
+/** Potted plant: broad veined leaves in a ribbed cream pot. */
+export const plant = () => {
+  const leaf = (cx, cy, len, wide, angle, fill, vein) => `
+    <g transform="rotate(${angle} ${cx} ${cy})">
+      <path d="M ${cx} ${cy} C ${cx - wide * 1.05} ${cy - len * 0.3}, ${cx - wide * 0.92} ${cy - len * 0.84}, ${cx} ${cy - len}
+               C ${cx + wide * 0.92} ${cy - len * 0.84}, ${cx + wide * 1.05} ${cy - len * 0.3}, ${cx} ${cy} Z" fill="${fill}"/>
+      <path d="M ${cx} ${cy - len * 0.06} L ${cx} ${cy - len * 0.9}" stroke="${vein}" stroke-width="3.5"
+            stroke-linecap="round" opacity="0.55"/>
+    </g>`;
+
+  return `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 420" width="340" height="420">
+  <defs>
+    ${grain('p-grain', { frequency: 1, strength: 0.32, seed: 4 })}
+    ${softShadow('p-shadow', { dx: 4, dy: 10, blur: 12, color: '#7C6B4C', opacity: 0.32 })}
+    ${blur('p-soft', 8)}
+    <linearGradient id="p-pot" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="${CREAM.light}"/>
+      <stop offset="0.55" stop-color="${CREAM.base}"/>
+      <stop offset="1" stop-color="${CREAM.shade}"/>
+    </linearGradient>
+    <linearGradient id="p-rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFAEE"/>
+      <stop offset="1" stop-color="${CREAM.mid}"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#p-shadow)">
+    <g filter="url(#p-grain)">
+      ${leaf(170, 258, 166, 52, -36, '#6E9153', '#4E6C39')}
+      ${leaf(170, 258, 154, 50, 34, '#5F8248', '#436031')}
+      ${leaf(170, 262, 128, 46, -70, '#7FA162', '#5B7C44')}
+      ${leaf(170, 262, 122, 44, 68, '#547A41', '#3C5A2C')}
+      ${leaf(170, 256, 180, 48, -4, '#749A57', '#52743C')}
+
+      <!-- pot -->
+      <path d="M 104 286 L 236 286 L 218 388 C 216 402, 206 410, 192 410 L 148 410
+               C 134 410, 124 402, 122 388 Z" fill="url(#p-pot)"/>
+      <rect x="92" y="264" width="156" height="34" rx="15" fill="url(#p-rim)"/>
+    </g>
+    <path d="M 128 304 C 122 338, 124 366, 132 394" stroke="#FFFDF5" stroke-opacity="0.55"
+          stroke-width="13" stroke-linecap="round" fill="none" filter="url(#p-soft)"/>
+    <path d="M 212 306 C 216 338, 214 364, 208 390" stroke="${CREAM.deep}" stroke-opacity="0.3"
+          stroke-width="12" stroke-linecap="round" fill="none" filter="url(#p-soft)"/>
+  </g>
+</svg>`;
+};
 
 export const birds = () => `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 90" width="240" height="90">
-  <g fill="none" stroke="#6F7C74" stroke-width="4" stroke-linecap="round" opacity="0.75">
-    <path d="M14 40 q 14 -14 26 0 q 12 -14 26 0"/>
-    <path d="M96 20 q 10 -10 19 0 q 9 -10 19 0"/>
-    <path d="M160 56 q 12 -12 22 0 q 11 -12 22 0"/>
+  <g fill="none" stroke="#6F7C74" stroke-width="4" stroke-linecap="round" opacity="0.7">
+    <path d="M14 40 q 14 -13 26 0 q 12 -13 26 0"/>
+    <path d="M96 20 q 10 -9 19 0 q 9 -9 19 0"/>
+    <path d="M160 56 q 12 -11 22 0 q 11 -11 22 0"/>
   </g>
 </svg>`;
 
@@ -352,9 +531,9 @@ export const LAYERS = {
   'cloud-2': { svg: () => cloud(1), width: 340 },
   'cloud-3': { svg: () => cloud(2), width: 280 },
   'cloud-4': { svg: () => cloud(3), width: 400 },
-  sun: { svg: sun, width: 420 },
+  sun: { svg: sun, width: 600 },
   moon: { svg: moon, width: 360 },
-  arch: { svg: arch, width: 420 },
-  plant: { svg: plant, width: 320 },
+  arch: { svg: arch, width: 428 },
+  plant: { svg: plant, width: 340 },
   birds: { svg: birds, width: 240 },
 };

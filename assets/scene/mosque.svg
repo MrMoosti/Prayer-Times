@@ -1,97 +1,137 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" width="900" height="760">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 780" width="900" height="780">
   <defs>
     
-  <linearGradient id="m-body" x1="0.15" y1="0" x2="0.85" y2="1">
-    <stop offset="0" stop-color="#FDF6E8"/>
-    <stop offset="0.55" stop-color="#F0E2C8"/>
-    <stop offset="1" stop-color="#DCC7A4"/>
-  </linearGradient>
-  <radialGradient id="m-dome" cx="0.34" cy="0.24" r="0.85">
-    <stop offset="0" stop-color="#FDF6E8"/>
-    <stop offset="0.5" stop-color="#F0E2C8"/>
-    <stop offset="1" stop-color="#B79E77"/>
-  </radialGradient>
-  <linearGradient id="m-deep" x1="0" y1="0" x2="0.6" y2="1">
-    <stop offset="0" stop-color="#DCC7A4"/>
-    <stop offset="1" stop-color="#B79E77"/>
-  </linearGradient>
-  <filter id="m-soft" x="-30%" y="-30%" width="160%" height="160%">
-    <feDropShadow dx="6" dy="12" stdDeviation="14" flood-color="#B79E77" flood-opacity="0.38"/>
-  </filter>
-  <filter id="m-inner" x="-30%" y="-30%" width="160%" height="160%">
-    <feGaussianBlur stdDeviation="9"/>
-  </filter>
-  <filter id="m-glow" x="-80%" y="-80%" width="260%" height="260%">
-    <feGaussianBlur stdDeviation="16"/>
+  <filter id="m-grain" x="-4%" y="-4%" width="108%" height="108%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="3" result="n"/>
+    <feColorMatrix in="n" type="saturate" values="0" result="g"/>
+    <feComponentTransfer in="g" result="a">
+      <feFuncA type="linear" slope="0.4" intercept="-0.100"/>
+    </feComponentTransfer>
+    <feComposite in="a" in2="SourceGraphic" operator="in" result="grain"/>
+    <feBlend in="SourceGraphic" in2="grain" mode="multiply"/>
   </filter>
     
-  <linearGradient id="g-body" x1="0.15" y1="0" x2="0.85" y2="1">
-    <stop offset="0" stop-color="#FBE6A6"/>
-    <stop offset="0.55" stop-color="#EFC65C"/>
-    <stop offset="1" stop-color="#D9A233"/>
-  </linearGradient>
-  <radialGradient id="g-dome" cx="0.34" cy="0.24" r="0.85">
-    <stop offset="0" stop-color="#FBE6A6"/>
-    <stop offset="0.5" stop-color="#EFC65C"/>
-    <stop offset="1" stop-color="#A97A1E"/>
-  </radialGradient>
-  <linearGradient id="g-deep" x1="0" y1="0" x2="0.6" y2="1">
-    <stop offset="0" stop-color="#D9A233"/>
-    <stop offset="1" stop-color="#A97A1E"/>
-  </linearGradient>
-  <filter id="g-soft" x="-30%" y="-30%" width="160%" height="160%">
-    <feDropShadow dx="6" dy="12" stdDeviation="14" flood-color="#A97A1E" flood-opacity="0.38"/>
+  <filter id="m-shadow" x="-40%" y="-40%" width="180%" height="200%">
+    <feDropShadow dx="5" dy="12" stdDeviation="14" flood-color="#96805A" flood-opacity="0.34"/>
   </filter>
-  <filter id="g-inner" x="-30%" y="-30%" width="160%" height="160%">
-    <feGaussianBlur stdDeviation="9"/>
+    
+  <filter id="m-soft" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur stdDeviation="10"/>
   </filter>
-  <filter id="g-glow" x="-80%" y="-80%" width="260%" height="260%">
-    <feGaussianBlur stdDeviation="16"/>
-  </filter>
-    <linearGradient id="window-lit" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#B9A382"/>
-      <stop offset="1" stop-color="#8C7355"/>
+    <linearGradient id="wall" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#FDF6E7"/>
+      <stop offset="0.5" stop-color="#EFE1C6"/>
+      <stop offset="1" stop-color="#CBB48C"/>
+    </linearGradient>
+    <radialGradient id="dome" cx="0.33" cy="0.2" r="0.9">
+      <stop offset="0" stop-color="#FFFBF0"/>
+      <stop offset="0.45" stop-color="#EFE1C6"/>
+      <stop offset="1" stop-color="#A98F65"/>
+    </radialGradient>
+    <linearGradient id="recess" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7E6544"/>
+      <stop offset="1" stop-color="#A98C63"/>
+    </linearGradient>
+    <linearGradient id="gold-body" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#FFF0BB"/>
+      <stop offset="0.55" stop-color="#F5C842"/>
+      <stop offset="1" stop-color="#B47C1B"/>
     </linearGradient>
   </defs>
 
-  <g filter="url(#m-soft)">
-    <!-- main hall -->
-    <rect x="150" y="430" width="470" height="300" rx="30" fill="url(#m-body)"/>
-    <!-- side wings -->
-    <rect x="96" y="520" width="80" height="210" rx="26" fill="url(#m-deep)" opacity="0.85"/>
-    <rect x="600" y="520" width="86" height="210" rx="26" fill="url(#m-deep)" opacity="0.85"/>
+  <g filter="url(#m-shadow)">
+    <g filter="url(#m-grain)">
+      <!-- prayer hall -->
+      <rect x="150" y="452" width="470" height="298" rx="26" fill="url(#wall)"/>
+      <!-- side wings, set back -->
+      <rect x="96" y="546" width="76" height="204" rx="22" fill="#E2D0AE"/>
+      <rect x="600" y="546" width="82" height="204" rx="22" fill="#E2D0AE"/>
 
-    <!-- drum + main dome -->
-    <rect x="270" y="368" width="228" height="80" rx="22" fill="url(#m-body)"/>
-    <path d="M384 150 C 512 150 552 268 552 372 L 216 372 C 216 268 256 150 384 150 Z" fill="url(#m-dome)"/>
-    <!-- dome highlight -->
-    <path d="M330 200 C 300 246 288 300 288 350" stroke="#FFFBF0" stroke-opacity="0.55" stroke-width="26"
-          stroke-linecap="round" fill="none" filter="url(#m-inner)"/>
-    <!-- dome underside shade -->
-    <path d="M470 210 C 512 262 524 320 524 366 L 470 366 Z" fill="#B79E77" opacity="0.22" filter="url(#m-inner)"/>
+      <!-- drum and main dome -->
+      <rect x="276" y="392" width="216" height="72" rx="18" fill="url(#wall)"/>
+      <path d="M 216 396
+    C 216 275.36, 239.52 205.76000000000002, 333.6 194.16
+    C 362.16 175.6, 375.6 168.64, 384 164
+    C 392.4 168.64, 405.84 175.6, 434.4 194.16
+    C 528.48 205.76000000000002, 552 275.36, 552 396 Z" fill="url(#dome)"/>
+      <!-- side dome -->
+      <path d="M 126 476
+    C 126 430.24, 134.68 403.84000000000003, 169.4 399.44
+    C 179.94 392.4, 184.9 389.76, 188 388
+    C 191.1 389.76, 196.06 392.4, 206.6 399.44
+    C 241.32 403.84000000000003, 250 430.24, 250 476 Z" fill="url(#dome)"/>
+      <rect x="140" y="470" width="96" height="26" rx="12" fill="url(#wall)"/>
 
-    <!-- small domes -->
-    <path d="M188 452 C 232 452 246 494 246 524 L 130 524 C 130 494 144 452 188 452 Z" fill="url(#m-dome)"/>
-    <path d="M642 452 C 686 452 700 494 700 524 L 584 524 C 584 494 598 452 642 452 Z" fill="url(#m-dome)"/>
+      <!-- minaret: shaft, balcony, upper shaft, cap -->
+      <rect x="750" y="286" width="60" height="464" rx="20" fill="url(#wall)"/>
+      <rect x="736" y="372" width="88" height="30" rx="14" fill="#E2D0AE"/>
+      <rect x="740" y="366" width="80" height="10" rx="5" fill="#FDF6E7" opacity="0.8"/>
+      <rect x="762" y="214" width="36" height="80" rx="14" fill="url(#wall)"/>
+      <path d="M 780 92 L 818 220 L 742 220 Z" fill="url(#dome)"/>
+    </g>
 
-    <!-- minaret -->
-    <rect x="742" y="230" width="74" height="500" rx="26" fill="url(#m-body)"/>
-    <rect x="730" y="352" width="98" height="34" rx="16" fill="url(#m-deep)"/>
-    <path d="M779 96 L 828 236 L 730 236 Z" fill="url(#m-dome)"/>
-    <rect x="762" y="252" width="34" height="84" rx="16" fill="#B79E77" opacity="0.28"/>
+    <!-- dome highlight and underside shade, kept out of the grain pass -->
+    <path d="M 322 232 C 292 288, 280 344, 280 392" stroke="#FFFCF3" stroke-opacity="0.6"
+          stroke-width="30" stroke-linecap="round" fill="none" filter="url(#m-soft)"/>
+    <path d="M 462 244 C 496 300, 502 350, 502 392 L 452 392 Z"
+          fill="#A98F65" opacity="0.22" filter="url(#m-soft)"/>
+    <path d="M 168 500 C 158 520, 154 540, 154 552" stroke="#FFFCF3" stroke-opacity="0.5"
+          stroke-width="14" stroke-linecap="round" fill="none" filter="url(#m-soft)"/>
+    <rect x="758" y="300" width="14" height="420" rx="7" fill="#FFFCF3" opacity="0.4" filter="url(#m-soft)"/>
   </g>
 
-  <!-- arched openings; these are the windows that light up at night -->
+  <!-- recessed openings; the glow layer lights these at night -->
   <g id="windows">
-    <path d="M385 520 C 425 520 442 552 442 588 L 442 700 L 328 700 L 328 588 C 328 552 345 520 385 520 Z" fill="url(#window-lit)"/>
-    <path d="M232 592 C 258 592 270 614 270 638 L 270 700 L 194 700 L 194 638 C 194 614 206 592 232 592 Z" fill="url(#window-lit)"/>
-    <path d="M540 592 C 566 592 578 614 578 638 L 578 700 L 502 700 L 502 638 C 502 614 514 592 540 592 Z" fill="url(#window-lit)"/>
-    <path d="M779 268 C 792 268 798 280 798 294 L 798 330 L 760 330 L 760 294 C 760 280 766 268 779 268 Z" fill="url(#window-lit)"/>
+    <path d="M 336 700
+    L 336 618.88
+    C 336 568.96, 360 544, 384 544
+    C 408 544, 432 568.96, 432 618.88
+    L 432 700 Z" fill="url(#recess)"/>
+    <path d="M 218 700
+    L 218 643.84
+    C 218 609.28, 235 592, 252 592
+    C 269 592, 286 609.28, 286 643.84
+    L 286 700 Z" fill="url(#recess)"/>
+    <path d="M 482 700
+    L 482 643.84
+    C 482 609.28, 499 592, 516 592
+    C 533 592, 550 609.28, 550 643.84
+    L 550 700 Z" fill="url(#recess)"/>
+    <path d="M 762 330
+    L 762 298.8
+    C 762 279.6, 770.5 270, 779 270
+    C 787.5 270, 796 279.6, 796 298.8
+    L 796 330 Z" fill="url(#recess)"/>
+  </g>
+  <g fill="none" stroke="#FDF6E7" stroke-opacity="0.55" stroke-width="5">
+    <path d="M 336 700
+    L 336 618.88
+    C 336 568.96, 360 544, 384 544
+    C 408 544, 432 568.96, 432 618.88
+    L 432 700 Z"/>
+    <path d="M 218 700
+    L 218 643.84
+    C 218 609.28, 235 592, 252 592
+    C 269 592, 286 609.28, 286 643.84
+    L 286 700 Z"/>
+    <path d="M 482 700
+    L 482 643.84
+    C 482 609.28, 499 592, 516 592
+    C 533 592, 550 609.28, 550 643.84
+    L 550 700 Z"/>
+    <path d="M 762 330
+    L 762 298.8
+    C 762 279.6, 770.5 270, 779 270
+    C 787.5 270, 796 279.6, 796 298.8
+    L 796 330 Z"/>
   </g>
 
-  <!-- finials -->
-  <g fill="url(#g-body)" filter="url(#g-soft)">
-    <path d="M384 92 a30 30 0 1 0 26 45 a24 24 0 1 1 -20 -37 a30 30 0 0 1 -6 -8 Z"/>
-    <path d="M779 44 a22 22 0 1 0 19 33 a18 18 0 1 1 -15 -27 a22 22 0 0 1 -4 -6 Z"/>
-  </g>
+  
+  <path d="M 384 120
+    a 30 30 0 1 0 21.599999999999998 51.6
+    a 24 24 0 1 1 -21.599999999999998 -51.6 Z" fill="url(#gold-body)"/>
+  
+  <path d="M 780 41
+    a 21 21 0 1 0 15.12 36.12
+    a 16.8 16.8 0 1 1 -15.12 -36.12 Z" fill="url(#gold-body)"/>
 </svg>
