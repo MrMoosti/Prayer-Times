@@ -68,10 +68,11 @@ export const InfoIcon = (p: IconProps) => (
   </svg>
 );
 
+/** A toothed cog. Radial spokes on a circle read as a sun, not a gear. */
 export const GearIcon = (p: IconProps) => (
   <svg {...base(p)}>
-    <circle cx="12" cy="12" r="3.2" />
-    <path d="M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2 5.5 5.5" />
+    <circle cx="12" cy="12" r="3.15" />
+    <path d="M19.36 12c0-.5-.05-.99-.14-1.46l1.83-1.3-1.87-3.24-2.1.85a7.5 7.5 0 0 0-2.52-1.46L14.2 3.2h-3.74l-.35 2.19a7.5 7.5 0 0 0-2.52 1.46l-2.1-.85-1.87 3.24 1.83 1.3a7.6 7.6 0 0 0 0 2.92l-1.83 1.3 1.87 3.24 2.1-.85a7.5 7.5 0 0 0 2.52 1.46l.35 2.19h3.74l.36-2.19a7.5 7.5 0 0 0 2.52-1.46l2.1.85 1.87-3.24-1.83-1.3c.09-.47.14-.96.14-1.46Z" />
   </svg>
 );
 
@@ -111,7 +112,7 @@ export const BookIcon = (p: IconProps) => (
 
 /* --- weather glyphs ------------------------------------------------ */
 
-const SunGlyph = (p: IconProps) => (
+export const SunGlyph = (p: IconProps) => (
   <svg {...base(p)}>
     <circle cx="12" cy="12" r="4.2" />
     <path d="M12 3v2M12 19v2M21 12h-2M5 12H3M18.4 5.6l-1.4 1.4M7 17l-1.4 1.4M18.4 18.4 17 17M7 7 5.6 5.6" />
@@ -167,7 +168,7 @@ const DrizzleGlyph = (p: IconProps) => (
   </svg>
 );
 
-const MoonGlyph = (p: IconProps) => (
+export const MoonGlyph = (p: IconProps) => (
   <svg {...base(p)}>
     <path d="M20 14.4A8.6 8.6 0 0 1 9.6 4 8.8 8.8 0 1 0 20 14.4Z" />
   </svg>

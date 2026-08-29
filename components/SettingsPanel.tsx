@@ -3,7 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { CloseIcon, PrayerGlyph } from './icons';
 import { CALCULATION_METHODS, HIGH_LATITUDE_LABELS } from '@/lib/settings';
-import { PRAYER_KEYS, PRAYER_LABELS, type LocationSetting, type PrayerKey, type Settings, type YearlyCalendar } from '@/lib/types';
+import {
+  PRAYABLE_KEYS,
+  PRAYER_KEYS,
+  PRAYER_LABELS,
+  type LocationSetting,
+  type PrayerKey,
+  type Settings,
+  type YearlyCalendar,
+} from '@/lib/types';
 import type { HighLatitudeRule } from '@/lib/solar';
 
 interface Props {
@@ -258,8 +266,8 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
           <div className="field">
             <span className="field__label">Announcements</span>
             <p className="field__hint">
-              A call tone plays on this device when a prayer time arrives. Tap the speaker on any
-              prayer row to turn its call on or off; shift-click it to hear the tone now.
+              A call tone plays on this device when a prayer time arrives. Shift-click a speaker on
+              any prayer row to hear it now.
             </p>
             <Switch
               label="Desktop notifications"
@@ -270,16 +278,40 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
           </div>
 
           <div className="field">
+            <span className="field__label">Announced prayers</span>
+            <p className="field__hint">
+              The speaker on a prayer row shows when its call is on. These are the same
+              switches, in case a row is hard to reach on a wall display.
+            </p>
+            <div className="offsets">
+              {PRAYABLE_KEYS.map((key) => (
+                <Switch
+                  key={key}
+                  label={PRAYER_LABELS[key].name}
+                  checked={settings.adhanEnabled[key]}
+                  onChange={(on) =>
+                    onChange({ adhanEnabled: { ...settings.adhanEnabled, [key]: on } })
+                  }
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="field">
             <span className="field__label">Appearance</span>
+            <p className="field__hint">
+              On “Follow the sun” the interface turns dark at Maghrib and light again at
+              sunrise. The toggle beside the gear pins it either way.
+            </p>
             <div className="segmented">
-              {(['auto', 'day', 'night'] as const).map((theme) => (
+              {(['auto', 'light', 'dark'] as const).map((theme) => (
                 <button
                   key={theme}
                   type="button"
                   aria-pressed={settings.theme === theme}
                   onClick={() => onChange({ theme })}
                 >
-                  {theme === 'auto' ? 'Follow the sun' : theme === 'day' ? 'Day' : 'Night'}
+                  {theme === 'auto' ? 'Follow the sun' : theme === 'light' ? 'Light' : 'Dark'}
                 </button>
               ))}
             </div>

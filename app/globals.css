@@ -20,11 +20,14 @@
   --page-bg: #f5efe3;
   --panel: #fdf8ef;
   --panel-deep: #2f4a36;
-  --row-bg: #f8f2e6;
+  --row-bg: #f7f1e4;
   --ink: #26382b;
   --ink-muted: #6d7c6f;
   --ink-on-deep: #f4efe2;
-  --accent: #d3a12f;
+  --accent: #eac46c;
+  --accent-ink: #bf871c;
+  --ink-on-scene: #26382b;
+  --ink-on-scene-shadow: transparent;
   --glow: #ffeec4;
   --clay-shadow: rgba(94, 76, 58, 0.18);
   --clay-light: rgba(255, 255, 255, 0.9);
@@ -67,7 +70,7 @@ button {
 }
 
 :focus-visible {
-  outline: 0.3rem solid var(--accent);
+  outline: 0.3rem solid var(--accent-ink);
   outline-offset: 0.3rem;
   border-radius: 1.2rem;
 }
@@ -122,25 +125,29 @@ button {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 2.6rem;
+  /* The tall top padding is the design: it leaves the landscape visible
+     above the cards instead of cropping it to a strip. */
+  padding: 13rem 6.4rem 6rem;
   height: 100vh;
   height: 100dvh;
-  padding: 3.6rem 3.6rem 2.4rem;
   isolation: isolate;
 }
 
 .app__main {
   display: grid;
-  grid-template-columns: 1.02fr 1.06fr 1.06fr;
-  gap: 2.4rem;
+  grid-template-columns: 1.33fr 1fr;
+  gap: 3.2rem;
   flex: 1;
   min-height: 0;
+  margin-top: 11rem;
 }
 
+/* Grid rather than flex so both cards are bounded by the column height and
+   the verse cannot push itself off the bottom of the screen. */
 .app__column {
-  display: flex;
-  flex-direction: column;
-  gap: 2.4rem;
+  display: grid;
+  grid-template-rows: 1fr 0.42fr;
+  gap: 3.2rem;
   min-height: 0;
 }
 
@@ -148,81 +155,45 @@ button {
 
 .header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 2.4rem;
   flex-shrink: 0;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 1.6rem;
-}
-
-.brand__mark {
-  width: 7.2rem;
-  height: 7.2rem;
-  border-radius: 2.2rem;
-  background: linear-gradient(150deg, #3d5f45, #26402d);
-  color: #f3ecdd;
-  display: grid;
-  place-items: center;
-  font-size: 3.6rem;
-  font-weight: 800;
-  letter-spacing: -0.1rem;
-  box-shadow:
-    0 1.4rem 2.8rem -0.8rem var(--clay-shadow),
-    inset 0 0.3rem 0 rgba(255, 255, 255, 0.18);
-}
-
-.brand__mark span {
-  color: var(--accent);
-}
-
-.brand__name {
-  font-size: 3.9rem;
-  font-weight: 800;
-  letter-spacing: -0.08rem;
-  margin: 0;
-  color: var(--ink);
-}
-
-.brand__name em {
-  font-style: normal;
-  font-weight: 600;
-  opacity: 0.62;
+  min-height: 6rem;
 }
 
 .meta {
   display: flex;
   align-items: center;
-  gap: 2.8rem;
-  margin-top: 2.4rem;
+  gap: 3.2rem;
 }
 
+/* The meta row sits on the scene, not on a panel, so it takes its colour from
+   the sky rather than from the light/dark mode. */
 .meta__item {
   display: flex;
   align-items: center;
-  gap: 1.1rem;
-  color: var(--ink);
+  gap: 1.3rem;
+  color: var(--ink-on-scene, #26382b);
+  text-shadow: 0 0.1rem 0.6rem var(--ink-on-scene-shadow, transparent);
+  transition: color 1.4s linear;
 }
 
 .meta__item + .meta__item {
-  padding-left: 2.8rem;
-  border-left: 0.2rem solid color-mix(in srgb, var(--ink) 18%, transparent);
+  padding-left: 3.2rem;
+  border-left: 0.2rem solid color-mix(in srgb, var(--ink-on-scene, #26382b) 24%, transparent);
 }
 
 .meta__label {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 700;
   line-height: 1.15;
 }
 
 .meta__value {
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   opacity: 0.68;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .header__actions {
@@ -235,10 +206,9 @@ button {
 
 .countdown {
   position: relative;
-  flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 3.2rem;
+  padding: 4.4rem 4.4rem 4rem;
   overflow: hidden;
   min-height: 0;
 }
@@ -254,40 +224,40 @@ button {
 
 .countdown__arch {
   position: absolute;
-  right: 4rem;
-  bottom: 8%;
-  height: 62%;
-  opacity: 0.6;
+  right: 7rem;
+  bottom: 9%;
+  height: 66%;
+  opacity: 0.8;
 }
 
 .countdown__plant {
   position: absolute;
-  right: 2.4rem;
-  bottom: 8%;
-  height: 20%;
+  right: 3rem;
+  bottom: 7%;
+  height: 24%;
 }
 
 .countdown__head {
   display: flex;
   align-items: center;
-  gap: 1.8rem;
+  gap: 2.6rem;
   position: relative;
 }
 
 .countdown__icon {
-  width: 8.4rem;
-  height: 8.4rem;
+  width: 12.4rem;
+  height: 12.4rem;
   flex-shrink: 0;
 }
 
 .countdown__eyebrow {
-  font-size: 1.9rem;
-  opacity: 0.78;
-  margin: 0 0 0.2rem;
+  font-size: 2.3rem;
+  opacity: 0.8;
+  margin: 0 0 0.6rem;
 }
 
 .countdown__name {
-  font-size: 5.6rem;
+  font-size: 8rem;
   font-weight: 800;
   line-height: 1;
   margin: 0;
@@ -296,48 +266,31 @@ button {
 
 .countdown__subtitle {
   color: var(--accent);
-  font-size: 2rem;
+  font-size: 2.6rem;
   font-weight: 600;
-  margin: 0.6rem 0 0;
+  margin: 0.8rem 0 0;
 }
 
 .countdown__rule {
   height: 0.2rem;
   background: rgba(255, 255, 255, 0.16);
-  margin: 2.6rem 0 2.4rem;
+  margin: 4rem 0 3.4rem;
   border-radius: 1rem;
 }
 
 .countdown__label {
-  font-size: 2rem;
-  opacity: 0.82;
-  margin: 0 0 0.4rem;
+  font-size: 2.5rem;
+  opacity: 0.85;
+  margin: 0 0 1rem;
   position: relative;
 }
 
 .countdown__value {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  font-size: 9.6rem;
+  font-size: 13.6rem;
   font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.4rem;
+  line-height: 0.94;
+  letter-spacing: -0.6rem;
   font-variant-numeric: tabular-nums;
-  position: relative;
-}
-
-.countdown__seconds {
-  font-size: 3.2rem;
-  letter-spacing: -0.1rem;
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.countdown__target {
-  font-size: 1.7rem;
-  opacity: 0.62;
-  margin: 1rem 0 0;
   position: relative;
 }
 
@@ -347,16 +300,17 @@ button {
   display: flex;
   align-items: center;
   gap: 1.4rem;
-  padding: 1.6rem 2.4rem;
+  padding: 2rem 3rem;
   border-radius: 999rem;
   background: rgba(255, 255, 255, 0.09);
   box-shadow:
     inset 0 0.2rem 0 rgba(255, 255, 255, 0.16),
     0 1rem 2rem -0.8rem rgba(0, 0, 0, 0.35);
   color: inherit;
-  font-size: 1.9rem;
+  font-size: 2.2rem;
   font-weight: 600;
-  width: 74%;
+  width: 60%;
+  min-width: 46rem;
   white-space: nowrap;
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
@@ -384,7 +338,7 @@ button {
 .card {
   display: flex;
   flex-direction: column;
-  padding: 2.6rem 2.4rem;
+  padding: 3rem 2.8rem;
   min-height: 0;
 }
 
@@ -398,15 +352,15 @@ button {
 }
 
 .card__title {
-  font-size: 2.6rem;
+  font-size: 3.2rem;
   font-weight: 800;
   margin: 0;
   letter-spacing: -0.04rem;
 }
 
 .card__action {
-  width: 4.4rem;
-  height: 4.4rem;
+  width: 5rem;
+  height: 5rem;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -435,9 +389,9 @@ button {
 .row {
   display: flex;
   align-items: center;
-  gap: 1.6rem;
-  padding: 1.3rem 1.8rem;
-  border-radius: 1.8rem;
+  gap: 1.8rem;
+  padding: 1.4rem 2rem;
+  border-radius: 2rem;
   background: var(--row-bg);
   color: var(--ink);
   flex: 1;
@@ -474,75 +428,56 @@ button {
 }
 
 .row__icon {
-  width: 3.6rem;
-  height: 3.6rem;
+  width: 4.2rem;
+  height: 4.2rem;
   flex-shrink: 0;
 }
 
 .row__name {
-  font-size: 2.3rem;
+  font-size: 2.8rem;
   font-weight: 700;
   flex: 1;
 }
 
 .row__time {
-  font-size: 2.3rem;
+  font-size: 2.8rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
 .row__speaker {
-  width: 3.2rem;
-  height: 3.2rem;
+  width: 3.6rem;
+  height: 3.6rem;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: var(--accent);
-  opacity: 0.95;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  color: var(--accent-ink);
+  transition: transform 0.2s ease, opacity 0.2s ease, color 1.4s linear;
 }
 
+.row[data-current='true'] .row__speaker {
+  color: var(--accent);
+}
+
+/* An announcement that is off shows only a faint trace, as in the design;
+   it stays a real target so it can be switched back on. */
 .row__speaker[data-muted='true'] {
-  opacity: 0.28;
+  opacity: 0.16;
   color: currentColor;
+}
+
+.row__speaker[data-muted='true']:hover,
+.row__speaker[data-muted='true']:focus-visible {
+  opacity: 0.7;
 }
 
 .row__speaker:hover {
   transform: scale(1.12);
 }
 
-/* --- kerahat ------------------------------------------------------- */
-
-.kerahat {
-  flex: 0 0 auto;
-}
-
-.kerahat .rows {
-  gap: 1rem;
-}
-
-.kerahat .row {
-  flex: 0 0 auto;
-  padding: 1.5rem 1.8rem;
-}
-
-.kerahat__label {
-  flex: 1;
-}
-
-.kerahat__name {
-  font-size: 2rem;
-  font-weight: 600;
-}
-
-.kerahat__range {
-  font-size: 2rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
+/* The active-window highlight is still used by the row component. */
 .row[data-active='true'] {
-  background: color-mix(in srgb, var(--accent) 22%, var(--row-bg));
+  background: color-mix(in srgb, var(--accent-ink) 22%, var(--row-bg));
   box-shadow:
     0 1rem 2rem -0.8rem var(--clay-shadow),
     inset 0 0.2rem 0 var(--clay-light);
@@ -552,28 +487,28 @@ button {
 
 .verse {
   position: relative;
-  flex: 1;
   display: flex;
-  gap: 1.8rem;
-  padding: 2.6rem;
+  align-items: flex-start;
+  gap: 2.2rem;
+  padding: 3rem 3.2rem;
   overflow: hidden;
   min-height: 0;
 }
 
 .verse__badge {
-  width: 5.6rem;
-  height: 5.6rem;
+  width: 6.4rem;
+  height: 6.4rem;
   flex-shrink: 0;
 }
 
 .verse__title {
-  font-size: 2.4rem;
+  font-size: 2.8rem;
   font-weight: 700;
   margin: 0 0 0.8rem;
 }
 
 .verse__text {
-  font-size: 2.1rem;
+  font-size: 2.4rem;
   line-height: 1.4;
   margin: 0;
   max-width: 26ch;
@@ -581,7 +516,7 @@ button {
 
 .verse__ref {
   color: var(--accent);
-  font-size: 1.7rem;
+  font-size: 1.9rem;
   margin: 1.2rem 0 0;
 }
 
@@ -595,46 +530,6 @@ button {
   pointer-events: none;
   user-select: none;
   font-family: 'Noto Naskh Arabic', 'Amiri', serif;
-}
-
-/* --- bottom nav ---------------------------------------------------- */
-
-.nav {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: 999rem;
-  flex-shrink: 0;
-}
-
-.nav__item {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.2rem;
-  padding: 1.4rem 2rem;
-  border-radius: 999rem;
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--ink);
-  opacity: 0.72;
-  transition: all 0.25s ease;
-}
-
-.nav__item:hover {
-  opacity: 1;
-  background: var(--row-bg);
-}
-
-.nav__item[aria-current='page'] {
-  background: var(--panel-deep);
-  color: var(--ink-on-deep);
-  opacity: 1;
-  box-shadow:
-    0 1.2rem 2.4rem -1rem var(--clay-shadow),
-    inset 0 0.2rem 0 rgba(255, 255, 255, 0.14);
 }
 
 /* --- weather chip -------------------------------------------------- */
@@ -653,7 +548,7 @@ button {
 }
 
 .weather__temp {
-  font-size: 2.4rem;
+  font-size: 2.6rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -666,8 +561,8 @@ button {
 }
 
 .icon-button {
-  width: 5.6rem;
-  height: 5.6rem;
+  width: 6.2rem;
+  height: 6.2rem;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -676,21 +571,35 @@ button {
   box-shadow:
     0 1.2rem 2.4rem -1rem var(--clay-shadow),
     inset 0 0.2rem 0 var(--clay-light);
-  transition: transform 0.25s ease, background-color 0.25s ease;
+  transition:
+    transform 0.3s ease,
+    background-color 1.4s linear,
+    color 1.4s linear,
+    box-shadow 1.4s linear;
+}
+
+/* A pinned theme gets a ring, so it is clear the clock is not driving it. */
+.icon-button[data-overridden='true'] {
+  box-shadow:
+    0 1.2rem 2.4rem -1rem var(--clay-shadow),
+    inset 0 0 0 0.3rem var(--accent-ink);
 }
 
 .icon-button:hover {
-  transform: rotate(35deg);
+  transform: scale(1.06);
+}
+
+.icon-button--gear:hover {
+  transform: rotate(45deg);
 }
 
 /* --- status / errors ----------------------------------------------- */
 
 .notice {
   position: absolute;
-  left: 50%;
-  bottom: 11rem;
-  transform: translateX(-50%);
-  padding: 1rem 2rem;
+  right: 6.4rem;
+  bottom: 1.4rem;
+  padding: 0.9rem 1.8rem;
   border-radius: 999rem;
   background: var(--panel);
   color: var(--ink);
@@ -732,11 +641,13 @@ button {
   .app {
     height: auto;
     min-height: 100dvh;
-    padding: 2rem 2rem 3rem;
+    padding: 3rem 2.4rem 4rem;
   }
 
   .app__main {
     grid-template-columns: 1fr;
+    margin-top: 3.2rem;
+    gap: 2.4rem;
   }
 
   .header {
@@ -745,14 +656,9 @@ button {
     gap: 1.6rem;
   }
 
-  .brand__name {
-    font-size: 3.2rem;
-  }
-
   .meta {
     flex-wrap: wrap;
     gap: 1.2rem 2rem;
-    margin-top: 1.6rem;
   }
 
   /* The dividers only make sense while the items sit on one line. */
@@ -765,6 +671,18 @@ button {
     justify-content: flex-end;
   }
 
+  .countdown {
+    padding: 3rem;
+  }
+
+  .countdown__name {
+    font-size: 6rem;
+  }
+
+  .countdown__value {
+    font-size: 10rem;
+  }
+
   .countdown__arch,
   .countdown__plant {
     display: none;
@@ -772,22 +690,17 @@ button {
 
   .countdown__cta {
     width: 100%;
-    margin-top: 2.4rem;
+    min-width: 0;
+    margin-top: 3rem;
   }
 
-  .nav {
-    position: sticky;
-    bottom: 0;
-  }
-
-  .nav__item span {
-    display: none;
+  .verse {
+    flex: 0 0 auto;
   }
 
   .notice {
     position: static;
-    transform: none;
-    margin: 0 auto;
+    margin: 2rem auto 0;
     text-align: center;
   }
 }
@@ -1063,12 +976,22 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.6rem;
+  gap: 2rem;
   padding: 2rem 3.2rem 2.8rem;
   border-top: 0.2rem solid color-mix(in srgb, var(--ink) 10%, transparent);
   flex-shrink: 0;
-  font-size: 1.5rem;
+  font-size: 1.45rem;
+  line-height: 1.35;
   opacity: 0.8;
+}
+
+.drawer__footer > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.drawer__footer .button-ghost {
+  flex-shrink: 0;
 }
 
 .button-ghost {

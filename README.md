@@ -1,15 +1,15 @@
 # Mektep Prayer
 
-A 1920×1080 prayer-times display: today's times, kerahat windows and a live
-countdown, over a claymorphic landscape that follows the real sun, moon and
+A 1920×1080 prayer-times display: today's times and a live countdown to the
+next prayer, over a claymorphic landscape that follows the real sun, moon and
 weather for the configured city.
 
 ![Midday](docs/midday.webp)
 
 | | |
 | --- | --- |
-| ![Sunset](docs/sunset.webp) | ![Night](docs/night.webp) |
-| ![Thunderstorm](docs/thunder.webp) | |
+| ![Just after Maghrib](docs/post-maghrib.webp) | ![Night](docs/night.webp) |
+| ![Thunderstorm](docs/thunder.webp) | ![Dawn](docs/dawn.webp) |
 
 Built with Next.js (App Router) and no UI framework — the clay look is a small
 set of CSS custom properties and shadows in `app/globals.css`.
@@ -33,7 +33,8 @@ npm run scene                # re-render the artwork (see "Artwork")
 
 Point a browser at it full-screen on a 16:9 display and it is a wall panel. The
 layout is authored at 1920×1080 and scales as one piece to any resolution;
-below 1000px wide it stacks into a phone layout.
+below 1000px wide it stacks into a phone layout. Times are shown on a 24-hour
+clock.
 
 ## Where the data comes from
 
@@ -92,10 +93,26 @@ The gear at the top right opens a drawer. Everything is stored in
 - **Time offsets** — ±60 minutes per prayer. This shifts the displayed time and
   delays the announcement with it, so `+5` on Dhuhr calls it five minutes after
   the calculated time.
-- **Announcements** — desktop notifications, plus the per-prayer speaker
-  toggles on each row.
-- **Appearance** — follow the sun / force day / force night, 24-hour clock,
-  weather on or off, and a reduce-motion switch that parks the animation.
+- **Announced prayers** — the same switches as the speakers on the rows, for
+  when a row is hard to reach on a wall display.
+- **Appearance** — light/dark mode, 24-hour clock, weather on or off, and a
+  reduce-motion switch that parks the animation.
+
+### Light and dark
+
+The interface turns **dark at Maghrib and light again at sunrise**. That is
+deliberately tied to the prayer times, not to the sun's altitude: Maghrib is
+the moment the day is over for the people reading the screen.
+
+The toggle beside the gear pins it either way — a ring around the button means
+the clock is no longer driving it. "Follow the sun" in the settings drawer
+hands it back.
+
+The sky is not part of that switch. It stays a continuous function of the sun's
+real altitude, so just after Maghrib you get dark cards under a sky that is
+still burning gold. Text that sits directly on the scene (the location and date
+row) takes its colour from the sky rather than from the mode, so it stays
+readable through that window.
 
 ## The call to prayer
 
@@ -116,10 +133,10 @@ It is picked up on the next load with no configuration.
 `components/scene/SceneBackground.tsx` draws it, and everything in it is
 driven by real values rather than a time-of-day preset:
 
-- **Palette** — every colour token is a continuous function of the sun's
-  altitude (`lib/sky.ts`), interpolated between keyframes, so the page drifts
-  from night through dawn to day with no visible switch. Dawn runs cool and
-  pink, dusk runs amber.
+- **Sky** — every sky colour is a continuous function of the sun's altitude
+  (`lib/sky.ts`), interpolated between keyframes, so the landscape drifts from
+  night through dawn to day with no visible switch. Dawn runs cool and pink,
+  dusk runs amber. The interface palette is separate, and switches at Maghrib.
 - **Sun and moon** — placed from real altitude and azimuth for the location.
   The moon carries its actual phase, carved out of the disc with a CSS mask.
   Both set behind the hills. The vertical arc is compressed into the strip of
@@ -165,7 +182,8 @@ scripts/              the artwork and its build
 
 ## Known gaps
 
-- The bottom nav's Prayer, Program, Community and Account tabs are placeholders.
-  Only Home is built.
-- Kerahat windows use the conventional 45 minutes; there is no setting for it.
+- One screen. There is no navigation and no other page.
+- Kerahat windows are still computed in `lib/prayer.ts` (`schedule.kerahat`,
+  the conventional 45-minute İşrak / İstiva / İsfirar windows) but nothing
+  renders them — they are meant to be presented differently.
 - Verse of the day rotates through 14 verses by day number.

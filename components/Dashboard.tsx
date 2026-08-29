@@ -2,19 +2,16 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import AnnouncementOverlay from './AnnouncementOverlay';
-import BottomNav, { type NavId } from './BottomNav';
 import CountdownCard from './CountdownCard';
 import Header from './Header';
-import KerahatCard from './KerahatCard';
-import PlaceholderCard from './PlaceholderCard';
 import PrayerTimesCard from './PrayerTimesCard';
 import SceneBackground from './scene/SceneBackground';
 import SettingsPanel from './SettingsPanel';
 import VerseCard from './VerseCard';
 import { playChime, unlockAudio } from '@/lib/adhan';
-import { buildSchedule } from '@/lib/prayer';
+import { buildSchedule, type Schedule } from '@/lib/prayer';
 import { isoDateIn } from '@/lib/time';
-import type { PrayerKey } from '@/lib/types';
+import type { PrayerKey, Settings } from '@/lib/types';
 import { useAnnouncer } from '@/lib/useAnnouncer';
 import { useNow } from '@/lib/useNow';
 import { useCalendar, useWeather } from '@/lib/usePrayerData';
@@ -23,20 +20,9 @@ import { useSettings } from '@/lib/useSettings';
 function BootShell() {
   return (
     <div className="app">
-      <header className="header">
-        <div className="brand">
-          <div className="brand__mark" aria-hidden="true">
-            m<span>.</span>
-          </div>
-          <h1 className="brand__name">
-            Mektep <em>Prayer</em>
-          </h1>
-        </div>
-      </header>
+      <header className="header" />
       <main className="app__main" aria-busy="true">
-        <div className="app__column">
-          <div className="clay clay-deep countdown" />
-        </div>
+        <div className="clay clay-deep countdown" />
         <div className="app__column">
           <div className="clay card">
             <div className="rows">
@@ -45,14 +31,28 @@ function BootShell() {
               ))}
             </div>
           </div>
-        </div>
-        <div className="app__column">
-          <div className="clay card kerahat" style={{ minHeight: '24rem' }} />
           <div className="clay clay-deep verse" />
         </div>
       </main>
     </div>
   );
+}
+
+/**
+ * Dark from Maghrib until sunrise. The switch is deliberately tied to the
+ * prayer times rather than to the sun's altitude: Maghrib is the moment the
+ * day is over for the people reading this screen.
+ */
+function isDarkNow(schedule: Schedule | null, settings: Settings, now: number): boolean {
+  if (settings.theme === 'light') return false;
+  if (settings.theme === 'dark') return true;
+  if (!schedule) return false;
+
+  const at = (key: PrayerKey) => schedule.entries.find((e) => e.key === key)?.at;
+  const maghrib = at('maghrib');
+  const sunrise = at('sunrise');
+  if (maghrib == null || sunrise == null) return false;
+  return now >= maghrib || now < sunrise;
 }
 
 export default function Dashboard() {
@@ -61,7 +61,6 @@ export default function Dashboard() {
   // The sky only needs repainting once a minute; the countdown ticks per second.
   const minuteNow = useNow(60_000);
 
-  const [nav, setNav] = useState<NavId>('home');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [audioArmed, setAudioArmed] = useState(false);
 
@@ -72,6 +71,8 @@ export default function Dashboard() {
     () => (calendar ? buildSchedule(calendar, settings, now) : null),
     [calendar, settings, now],
   );
+
+  const dark = useMemo(() => isDarkNow(schedule, settings, now), [schedule, settings, now]);
 
   const { announcement, dismiss, announce } = useAnnouncer(schedule, settings, now);
 
@@ -106,6 +107,11 @@ export default function Dashboard() {
     [announce],
   );
 
+  // Tapping the toggle pins the opposite mode; 'auto' is restored in settings.
+  const toggleTheme = useCallback(() => {
+    update({ theme: dark ? 'light' : 'dark' });
+  }, [dark, update]);
+
   const isoDate = isoDateIn(now || Date.now(), settings.location.timezone);
 
   // Nothing time-dependent may reach the server-rendered HTML, so the first
@@ -114,56 +120,45 @@ export default function Dashboard() {
 
   return (
     <>
-      <SceneBackground settings={settings} weather={weather} minuteNow={minuteNow} />
+      <SceneBackground
+        settings={settings}
+        weather={weather}
+        minuteNow={minuteNow}
+        dark={dark}
+      />
 
       <div className="app">
         <Header
           settings={settings}
           weather={weather}
           now={now}
+          dark={dark}
+          onToggleTheme={toggleTheme}
           onOpenSettings={() => setSettingsOpen(true)}
         />
 
         <main className="app__main">
-          {nav === 'home' ? (
-            <>
-              <div className="app__column">
-                <CountdownCard
-                  schedule={schedule}
-                  settings={settings}
-                  now={now}
-                  audioArmed={audioArmed}
-                  onArmAudio={armAudio}
-                />
-              </div>
-              <div className="app__column">
-                <PrayerTimesCard
-                  schedule={schedule}
-                  settings={settings}
-                  loading={loading || !ready}
-                  onToggleAdhan={toggleAdhan}
-                  onPreviewAdhan={previewAdhan}
-                />
-              </div>
-              <div className="app__column">
-                <KerahatCard schedule={schedule} settings={settings} now={now} />
-                <VerseCard isoDate={isoDate} />
-              </div>
-            </>
-          ) : (
-            <div className="app__column" style={{ gridColumn: '1 / -1' }}>
-              <PlaceholderCard section={nav} />
-            </div>
-          )}
+          <CountdownCard
+            schedule={schedule}
+            now={now}
+            audioArmed={audioArmed}
+            onArmAudio={armAudio}
+          />
+          <div className="app__column">
+            <PrayerTimesCard
+              schedule={schedule}
+              settings={settings}
+              loading={loading || !ready}
+              onToggleAdhan={toggleAdhan}
+              onPreviewAdhan={previewAdhan}
+            />
+            <VerseCard isoDate={isoDate} />
+          </div>
         </main>
-
-        <BottomNav active={nav} onSelect={setNav} />
 
         {error && <p className="notice">Prayer times unavailable: {error}</p>}
         {!error && calendar?.source === 'calculated' && (
-          <p className="notice">
-            Offline — times calculated locally for {settings.location.name}.
-          </p>
+          <p className="notice">Offline — times calculated locally for {settings.location.name}.</p>
         )}
       </div>
 
