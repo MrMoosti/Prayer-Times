@@ -128,9 +128,9 @@ button {
   position: relative;
   display: flex;
   flex-direction: column;
-  /* The tall top padding is the design: it leaves the landscape visible
-     above the cards instead of cropping it to a strip. */
-  padding: 13rem 6.4rem 6rem;
+  /* The header sits high and the cards start low, so the landscape gets a
+     real band between them rather than a sliver. */
+  padding: 10rem 6.4rem 5.5rem;
   height: 100vh;
   height: 100dvh;
   isolation: isolate;
@@ -142,7 +142,7 @@ button {
   gap: 3.2rem;
   flex: 1;
   min-height: 0;
-  margin-top: 11rem;
+  margin-top: 19rem;
 }
 
 /* Grid rather than flex so both cards are bounded by the column height and
