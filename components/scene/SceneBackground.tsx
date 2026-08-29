@@ -261,8 +261,8 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
       <div className="land">
         <img className="land__band land__band--back" src="/scene/hills-back.webp" alt="" width={1600} height={520} />
         <div className="land__mosque">
-          <img src="/scene/mosque.webp" alt="" width={900} height={760} />
-          <img className="land__mosque-glow" src="/scene/mosque-glow.webp" alt="" width={900} height={760} />
+          <img className="land__mosque-base" src="/scene/mosque.webp" alt="" width={900} height={780} />
+          <img className="land__mosque-glow" src="/scene/mosque-glow.webp" alt="" width={900} height={780} />
         </div>
         <img className="land__band land__band--mid" src="/scene/hills-mid.webp" alt="" width={1600} height={520} />
         <img className="land__band land__band--front" src="/scene/hills-front.webp" alt="" width={1600} height={520} />

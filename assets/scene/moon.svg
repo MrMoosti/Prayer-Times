@@ -1,25 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" width="360" height="360">
   <defs>
-    <radialGradient id="mn" cx="0.34" cy="0.28" r="0.85">
-      <stop offset="0" stop-color="#FFFBEF"/>
-      <stop offset="0.55" stop-color="#F1E6CE"/>
-      <stop offset="1" stop-color="#CDBE9E"/>
+    
+  <filter id="mn-grain" x="-4%" y="-4%" width="108%" height="108%">
+    <feTurbulence type="fractalNoise" baseFrequency="1" numOctaves="4" seed="5" result="n"/>
+    <feColorMatrix in="n" type="saturate" values="0" result="g"/>
+    <feComponentTransfer in="g" result="a">
+      <feFuncA type="linear" slope="0.3" intercept="-0.075"/>
+    </feComponentTransfer>
+    <feComposite in="a" in2="SourceGraphic" operator="in" result="grain"/>
+    <feBlend in="SourceGraphic" in2="grain" mode="multiply"/>
+  </filter>
+    
+  <filter id="mn-soft" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur stdDeviation="7"/>
+  </filter>
+    <radialGradient id="mn-face" cx="0.34" cy="0.28" r="0.85">
+      <stop offset="0" stop-color="#FFFCF2"/>
+      <stop offset="0.55" stop-color="#F2E7D0"/>
+      <stop offset="1" stop-color="#CDBEA0"/>
     </radialGradient>
-    <filter id="mn-s" x="-60%" y="-60%" width="220%" height="220%">
+    <filter id="mn-shadow" x="-60%" y="-60%" width="220%" height="220%">
       <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#0B1622" flood-opacity="0.5"/>
     </filter>
-    <filter id="mn-b" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="7"/>
-    </filter>
   </defs>
-  <g filter="url(#mn-s)">
-    <circle cx="180" cy="180" r="128" fill="url(#mn)"/>
-    <g fill="#D9CBAC" opacity="0.55" filter="url(#mn-b)">
+  <g filter="url(#mn-shadow)">
+    <circle cx="180" cy="180" r="128" fill="url(#mn-face)" filter="url(#mn-grain)"/>
+    <g fill="#D8C9A9" opacity="0.5" filter="url(#mn-soft)">
       <circle cx="146" cy="152" r="26"/>
       <circle cx="214" cy="206" r="19"/>
       <circle cx="160" cy="228" r="14"/>
       <circle cx="226" cy="140" r="11"/>
     </g>
-    <ellipse cx="142" cy="140" rx="42" ry="34" fill="#FFFDF6" opacity="0.5" filter="url(#mn-b)"/>
+    <ellipse cx="142" cy="140" rx="42" ry="34" fill="#FFFEF8" opacity="0.5" filter="url(#mn-soft)"/>
   </g>
 </svg>

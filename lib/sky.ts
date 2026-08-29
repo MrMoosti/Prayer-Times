@@ -82,13 +82,13 @@ const GOLDEN_DUSK: SkyPalette = {
 };
 
 const GOLDEN: SkyPalette = {
-  skyTop: '#bfd0d3', skyMid: '#eed3a4', skyBottom: '#f7e9d3',
+  skyTop: '#c8d8d9', skyMid: '#f0d7ae', skyBottom: '#f8ecd9',
   glow: '#ffe8bd', landTint: '#9aa98a', landShade: '#6a7c5f',
   stars: 0, windowGlow: 0.3,
 };
 
 const DAY: SkyPalette = {
-  skyTop: '#a6c9dc', skyMid: '#cfe0e4', skyBottom: '#f1e8d7',
+  skyTop: '#b8d5e4', skyMid: '#d7e5e6', skyBottom: '#f3ead9',
   glow: '#ffeec4', landTint: '#9db089', landShade: '#6c8060',
   stars: 0, windowGlow: 0,
 };

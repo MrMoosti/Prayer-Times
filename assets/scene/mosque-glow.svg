@@ -1,27 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" width="900" height="760">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 780" width="900" height="780">
   <defs>
-    <linearGradient id="window-lit" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FFF0BE"/>
-      <stop offset="1" stop-color="#F2B13F"/>
+    <linearGradient id="lit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF1C4"/>
+      <stop offset="1" stop-color="#F0AE3E"/>
     </linearGradient>
-    <filter id="bloom" x="-120%" y="-120%" width="340%" height="340%">
-      <feGaussianBlur stdDeviation="22"/>
-    </filter>
+    
+  <filter id="bloom" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur stdDeviation="20"/>
+  </filter>
   </defs>
-  <g opacity="0.85" filter="url(#bloom)"><g id="windows">
-    <path d="M385 520 C 425 520 442 552 442 588 L 442 700 L 328 700 L 328 588 C 328 552 345 520 385 520 Z" fill="url(#window-lit)"/>
-    <path d="M232 592 C 258 592 270 614 270 638 L 270 700 L 194 700 L 194 638 C 194 614 206 592 232 592 Z" fill="url(#window-lit)"/>
-    <path d="M540 592 C 566 592 578 614 578 638 L 578 700 L 502 700 L 502 638 C 502 614 514 592 540 592 Z" fill="url(#window-lit)"/>
-    <path d="M779 268 C 792 268 798 280 798 294 L 798 330 L 760 330 L 760 294 C 760 280 766 268 779 268 Z" fill="url(#window-lit)"/>
+  <g opacity="0.8" filter="url(#bloom)">
+    <path d="M 336 700
+    L 336 618.88
+    C 336 568.96, 360 544, 384 544
+    C 408 544, 432 568.96, 432 618.88
+    L 432 700 Z" fill="url(#lit)"/>
+    <path d="M 218 700
+    L 218 643.84
+    C 218 609.28, 235 592, 252 592
+    C 269 592, 286 609.28, 286 643.84
+    L 286 700 Z" fill="url(#lit)"/>
+    <path d="M 482 700
+    L 482 643.84
+    C 482 609.28, 499 592, 516 592
+    C 533 592, 550 609.28, 550 643.84
+    L 550 700 Z" fill="url(#lit)"/>
+    <path d="M 762 330
+    L 762 298.8
+    C 762 279.6, 770.5 270, 779 270
+    C 787.5 270, 796 279.6, 796 298.8
+    L 796 330 Z" fill="url(#lit)"/>
   </g>
-
-  </g>
-  <g id="windows">
-    <path d="M385 520 C 425 520 442 552 442 588 L 442 700 L 328 700 L 328 588 C 328 552 345 520 385 520 Z" fill="url(#window-lit)"/>
-    <path d="M232 592 C 258 592 270 614 270 638 L 270 700 L 194 700 L 194 638 C 194 614 206 592 232 592 Z" fill="url(#window-lit)"/>
-    <path d="M540 592 C 566 592 578 614 578 638 L 578 700 L 502 700 L 502 638 C 502 614 514 592 540 592 Z" fill="url(#window-lit)"/>
-    <path d="M779 268 C 792 268 798 280 798 294 L 798 330 L 760 330 L 760 294 C 760 280 766 268 779 268 Z" fill="url(#window-lit)"/>
-  </g>
-
-  
+  <path d="M 336 700
+    L 336 618.88
+    C 336 568.96, 360 544, 384 544
+    C 408 544, 432 568.96, 432 618.88
+    L 432 700 Z" fill="url(#lit)"/>
+  <path d="M 218 700
+    L 218 643.84
+    C 218 609.28, 235 592, 252 592
+    C 269 592, 286 609.28, 286 643.84
+    L 286 700 Z" fill="url(#lit)"/>
+  <path d="M 482 700
+    L 482 643.84
+    C 482 609.28, 499 592, 516 592
+    C 533 592, 550 609.28, 550 643.84
+    L 550 700 Z" fill="url(#lit)"/>
+  <path d="M 762 330
+    L 762 298.8
+    C 762 279.6, 770.5 270, 779 270
+    C 787.5 270, 796 279.6, 796 298.8
+    L 796 330 Z" fill="url(#lit)"/>
 </svg>
