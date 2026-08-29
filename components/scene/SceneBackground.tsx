@@ -39,6 +39,21 @@ function project(altitudeDeg: number, azimuthDeg: number) {
   return { left: `${x.toFixed(2)}%`, top: `${y.toFixed(2)}%` };
 }
 
+/**
+ * Picks one of the four rendered phases.
+ *
+ * The renders are lit from the left, which is a waning moon in the northern
+ * hemisphere, so a waxing moon is the same art mirrored.
+ */
+function moonArt(fraction: number, phase: number) {
+  const name =
+    fraction < 0.2 ? 'moon-crescent'
+    : fraction < 0.55 ? 'moon-half'
+    : fraction < 0.88 ? 'moon-gibbous'
+    : 'moon-full';
+  return { src: `/scene/${name}.webp`, waxing: phase < 0.5 };
+}
+
 /** Deterministic 0..1 from an integer, so clouds are stable across renders. */
 const noise = (n: number) => {
   const v = Math.sin(n * 127.1 + 311.7) * 43758.5453;
@@ -55,8 +70,8 @@ interface CloudSprite {
   delay: string;
 }
 
-function buildClouds(cloudiness: number): CloudSprite[] {
-  const count = Math.round(2 + cloudiness * 7);
+function buildClouds(cloudiness: number, raining: boolean): CloudSprite[] {
+  const count = Math.round(2 + cloudiness * 6);
   return Array.from({ length: count }, (_, i) => {
     const a = noise(i + 1);
     const b = noise(i + 41);
@@ -64,18 +79,32 @@ function buildClouds(cloudiness: number): CloudSprite[] {
     // Higher clouds are smaller, slower and fainter: cheap aerial perspective.
     const depth = a;
     const duration = 150 + depth * 220;
+    // Only the lower, nearer clouds carry rain - a drizzling cloud at the top
+    // of the sky reads as a sticker.
+    const wet = raining && depth < 0.55;
     return {
       id: i,
-      src: `/scene/cloud-${(i % 4) + 1}.webp`,
-      top: `${4 + b * 34}%`,
-      size: `${(30 - depth * 14).toFixed(1)}rem`,
-      opacity: Number((0.45 + (1 - depth) * 0.45 * Math.min(1, cloudiness + 0.35)).toFixed(2)),
+      src: wet ? '/scene/cloud-rain.webp' : `/scene/cloud-${(i % 2) + 1}.webp`,
+      top: `${3 + b * 26}%`,
+      size: `${(30 - depth * 13).toFixed(1)}rem`,
+      opacity: Number((0.55 + (1 - depth) * 0.4 * Math.min(1, cloudiness + 0.4)).toFixed(2)),
       duration: `${duration.toFixed(0)}s`,
       // Negative delays scatter the clouds across the sky on first paint.
       delay: `${(-c * duration).toFixed(0)}s`,
     };
   });
 }
+
+/** Trees and bush clumps standing in front of the hill band. */
+const SCENERY: Array<{ src: string; left: string; bottom: string; width: string }> = [
+  { src: '/scene/tree.webp', left: '4%', bottom: '30%', width: '8rem' },
+  { src: '/scene/bushes.webp', left: '11%', bottom: '28%', width: '10rem' },
+  { src: '/scene/bushes.webp', left: '31%', bottom: '33%', width: '8rem' },
+  { src: '/scene/tree.webp', left: '45%', bottom: '31%', width: '6.5rem' },
+  { src: '/scene/bushes.webp', left: '57%', bottom: '36%', width: '7rem' },
+  { src: '/scene/tree.webp', left: '85%', bottom: '32%', width: '7.5rem' },
+  { src: '/scene/bushes.webp', left: '93%', bottom: '29%', width: '9rem' },
+];
 
 export interface SceneState {
   phase: SkyPhase;
@@ -114,12 +143,16 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
     // A pinned theme also pins the sky, so "dark mode" is not a bright sky
     // behind dark cards.
     const forced =
-      settings.theme === 'light' ? Math.max(sunAlt, 25) : settings.theme === 'dark' ? Math.min(sunAlt, -30) : sunAlt;
+      settings.theme === 'light'
+        ? Math.max(sunAlt, 25)
+        : settings.theme === 'dark'
+          ? Math.min(sunAlt, -30)
+          : sunAlt;
     const sky = applyWeather(skyFor(forced, rising), effects.cloudiness, effects.fog);
 
-    // Hills and the mosque are one flat art asset; brightness carries them
-    // through the day rather than a second night-time set of images.
-    const bright = Math.max(0.3, Math.min(1.05, 0.34 + (forced + 12) / 26));
+    // One brightness value carries the whole landscape from noon to midnight,
+    // rather than a second set of night-time art.
+    const bright = Math.max(0.32, Math.min(1.05, 0.36 + (forced + 12) / 26));
 
     return {
       sky,
@@ -129,16 +162,15 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
       moonAlt,
       sunPos: project(sunAlt, sun.azimuth * DEG),
       moonPos: project(moonAlt, moon.azimuth * DEG),
-      moonFraction: moon.fraction,
-      moonPhase: moon.phase,
+      moon: moonArt(moon.fraction, moon.phase),
       bright,
       phase: skyPhase(forced, rising),
     };
   }, [latitude, longitude, minuteNow, weather, settings.theme]);
 
   const clouds = useMemo(
-    () => buildClouds(scene.effects.cloudiness),
-    [scene.effects.cloudiness],
+    () => buildClouds(scene.effects.cloudiness, scene.effects.precipitation > 0),
+    [scene.effects.cloudiness, scene.effects.precipitation],
   );
 
   useEffect(() => {
@@ -157,10 +189,13 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
     for (const [key, value] of Object.entries(vars)) root.style.setProperty(key, value);
     root.style.setProperty('--land-bright', scene.bright.toFixed(3));
     root.style.setProperty('--land-sat', (0.7 + scene.bright * 0.35).toFixed(3));
+    // The card ornaments are rendered in the light-mode card green, so they
+    // have to be dimmed by the same amount the card itself is.
+    root.style.setProperty('--ornament-bright', dark ? '0.72' : '1');
     root.style.setProperty('--fog-opacity', scene.effects.fog.toFixed(2));
     root.style.setProperty(
       '--precip-opacity',
-      scene.effects.precipitation === 0 ? '0' : String(0.35 + scene.effects.precipitation * 0.2),
+      scene.effects.precipitation === 0 ? '0' : String(0.3 + scene.effects.precipitation * 0.18),
     );
     root.style.setProperty(
       '--rain-speed',
@@ -170,14 +205,10 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
 
   const { effects } = scene;
   const sunVisible = scene.sunAlt > -8;
-  const moonVisible = scene.moonAlt > -4;
+  // A daytime moon is real, but the rendered disc is opaque enough to read as
+  // a grey blob in a bright sky, so it is dropped once the sun is properly up.
+  const moonVisible = scene.moonAlt > -4 && scene.sunAlt < 6;
   const dim = 1 - effects.celestialDimming;
-
-  // Carve the lunar phase out of the disc: a same-size circle slid across it.
-  const waning = scene.moonPhase > 0.5;
-  const shadowOffset = 71 * scene.moonFraction * (waning ? 1 : -1);
-  const moonMask = `radial-gradient(ellipse 35.5% 35.5% at ${(50 + shadowOffset).toFixed(1)}% 50%, transparent 0 98%, #000 100%)`;
-
   const still = settings.reducedMotion;
 
   return (
@@ -193,7 +224,8 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
           className="scene__sunglow"
           style={{
             left: scene.sunPos.left,
-            opacity: Math.max(0, 1 - Math.abs(scene.sunAlt) / 14) * (1 - effects.celestialDimming * 0.7),
+            opacity:
+              Math.max(0, 1 - Math.abs(scene.sunAlt) / 14) * (1 - effects.celestialDimming * 0.7),
           }}
         />
       )}
@@ -203,13 +235,16 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
           className="celestial celestial--sun"
           style={{ ...scene.sunPos, opacity: Math.max(0.15, dim) }}
         >
-          <div className="celestial__halo" style={{ animationPlayState: still ? 'paused' : undefined }} />
+          <div
+            className="celestial__halo"
+            style={{ animationPlayState: still ? 'paused' : undefined }}
+          />
           <img
-            className={still ? undefined : 'celestial__rays'}
-            src="/scene/sun.webp"
+            className={still ? undefined : 'celestial__spin'}
+            src="/scene/sun-full.webp"
             alt=""
-            width={420}
-            height={420}
+            width={380}
+            height={380}
           />
         </div>
       )}
@@ -219,17 +254,17 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
           className="celestial celestial--moon"
           style={{
             ...scene.moonPos,
-            // A daytime moon is real, but it should be barely there.
-            opacity: Math.max(0.08, dim * (scene.sunAlt > 2 ? 0.28 : 1)),
+            opacity: Math.max(0.12, dim * (scene.sunAlt > -2 ? 0.4 : 1)),
           }}
         >
           <div className="celestial__halo" style={{ opacity: scene.sunAlt < -6 ? 0.5 : 0.1 }} />
-          <div
-            className="celestial__moon-disc"
-            style={{ ['--moon-mask' as string]: moonMask }}
-          >
-            <img src="/scene/moon.webp" alt="" width={360} height={360} />
-          </div>
+          <img
+            src={scene.moon.src}
+            alt=""
+            width={260}
+            height={260}
+            style={scene.moon.waxing ? { transform: 'scaleX(-1)' } : undefined}
+          />
         </div>
       )}
 
@@ -247,25 +282,43 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
               animationPlayState: still ? 'paused' : undefined,
             }}
           >
-            <img src={cloud.src} alt="" width={340} height={170} />
+            <img src={cloud.src} alt="" width={640} height={334} />
           </div>
         ))}
       </div>
 
-      {scene.sunAlt > 0 && effects.cloudiness < 0.7 && (
-        <div className="birds" style={{ animationDelay: '-60s' }}>
-          <img src="/scene/birds.webp" alt="" width={240} height={90} />
-        </div>
-      )}
-
       <div className="land">
-        <img className="land__band land__band--back" src="/scene/hills-back.webp" alt="" width={1600} height={520} />
+        <img className="land__hills" src="/scene/landscape.webp" alt="" width={2172} height={328} />
+
         <div className="land__mosque">
-          <img className="land__mosque-base" src="/scene/mosque.webp" alt="" width={900} height={780} />
-          <img className="land__mosque-glow" src="/scene/mosque-glow.webp" alt="" width={900} height={780} />
+          <img
+            className="land__mosque-day"
+            src="/scene/mosque-day.webp"
+            alt=""
+            width={1200}
+            height={1023}
+            style={{ opacity: dark ? 0 : 1 }}
+          />
+          {/* Its own render, with the windows lit, rather than a glow overlay. */}
+          <img
+            className="land__mosque-night"
+            src="/scene/mosque-night.webp"
+            alt=""
+            width={1200}
+            height={1023}
+            style={{ opacity: dark ? 1 : 0 }}
+          />
         </div>
-        <img className="land__band land__band--mid" src="/scene/hills-mid.webp" alt="" width={1600} height={520} />
-        <img className="land__band land__band--front" src="/scene/hills-front.webp" alt="" width={1600} height={520} />
+
+        {SCENERY.map((item, i) => (
+          <img
+            key={i}
+            className="land__sprite"
+            src={item.src}
+            alt=""
+            style={{ left: item.left, bottom: item.bottom, width: item.width }}
+          />
+        ))}
       </div>
 
       {effects.precipitation > 0 && (
@@ -279,7 +332,9 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
             <>
               <div className="precip__rain" />
               <div className="precip__rain precip__rain--far" />
-              {effects.precipitationType === 'sleet' && <div className="precip__snow precip__snow--far" />}
+              {effects.precipitationType === 'sleet' && (
+                <div className="precip__snow precip__snow--far" />
+              )}
             </>
           )}
         </div>

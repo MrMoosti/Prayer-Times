@@ -13,9 +13,7 @@ export default function VerseCard({ isoDate }: { isoDate: string }) {
         <p className="verse__text">{verse.text}</p>
         <p className="verse__ref">— {verse.reference}</p>
       </div>
-      <span className="verse__glyph" aria-hidden="true">
-        {verse.glyph}
-      </span>
+      <img className="verse__glyph" src="/scene/calligraphy.webp" alt="" aria-hidden="true" />
     </section>
   );
 }

@@ -32,7 +32,7 @@ export default function CountdownCard({ schedule, now, audioArmed, onArmAudio }:
 
       <div className="countdown__head">
         <div className="clay-badge countdown__icon">
-          {next ? <PrayerGlyph prayer={next.key} width={62} height={62} /> : null}
+          {next ? <PrayerGlyph prayer={next.key} width={78} height={78} /> : null}
         </div>
         <div>
           <p className="countdown__eyebrow">{eyebrow}</p>

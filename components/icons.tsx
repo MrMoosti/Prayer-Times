@@ -202,65 +202,38 @@ export function WeatherGlyph({ name, ...props }: IconProps & { name: string }) {
 
 /* --- prayer glyphs -------------------------------------------------- */
 
-/** Filled, coloured marks - these sit inside the raised clay badges. */
-export function PrayerGlyph({ prayer, ...props }: IconProps & { prayer: PrayerKey }) {
-  const common = { viewBox: '0 0 32 32', ...props };
-  switch (prayer) {
-    case 'fajr':
-      return (
-        <svg {...common}>
-          <path
-            d="M21.5 6a10.5 10.5 0 1 0 6 12.6A8.4 8.4 0 0 1 21.5 6Z"
-            fill="#4E7A52"
-          />
-          <path d="m10.5 8 1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1Z" fill="#7CB07F" />
-        </svg>
-      );
-    case 'sunrise':
-      return (
-        <svg {...common}>
-          <circle cx="16" cy="17" r="6" fill="#F2C24E" />
-          <path d="M16 4v3.5M26 9.5l-2.4 2.4M6 9.5l2.4 2.4" stroke="#E7A93C" strokeWidth="2.4" strokeLinecap="round" />
-          <rect x="4" y="21.5" width="24" height="3.4" rx="1.7" fill="#8CA778" />
-        </svg>
-      );
-    case 'dhuhr':
-      return (
-        <svg {...common}>
-          <circle cx="16" cy="16" r="7" fill="#F5C445" />
-          <g stroke="#EDB13B" strokeWidth="2.6" strokeLinecap="round">
-            <path d="M16 3v3.4M16 25.6V29M29 16h-3.4M6.4 16H3M25.2 6.8l-2.4 2.4M9.2 22.8l-2.4 2.4M25.2 25.2l-2.4-2.4M9.2 9.2 6.8 6.8" />
-          </g>
-        </svg>
-      );
-    case 'asr':
-      return (
-        <svg {...common}>
-          <circle cx="16" cy="18" r="6.4" fill="#EFB855" />
-          <g stroke="#DFA13F" strokeWidth="2.4" strokeLinecap="round">
-            <path d="M16 6.4v2.6M26.4 12.6l-2.2 1.6M5.6 12.6l2.2 1.6" />
-          </g>
-          <rect x="4" y="23" width="24" height="3.2" rx="1.6" fill="#A8B98F" />
-        </svg>
-      );
-    case 'maghrib':
-      return (
-        <svg {...common}>
-          <path d="M9 20a7 7 0 0 1 14 0Z" fill="#E8804B" />
-          <path d="M6 20h20" stroke="#E8804B" strokeWidth="2.6" strokeLinecap="round" />
-          <g stroke="#F3A45F" strokeWidth="2.4" strokeLinecap="round">
-            <path d="M16 6.6v2.6M25.4 11.4l-1.9 1.9M6.6 11.4l1.9 1.9" />
-          </g>
-          <rect x="4" y="23.6" width="24" height="3.2" rx="1.6" fill="#C2A98C" />
-        </svg>
-      );
-    case 'isha':
-    default:
-      return (
-        <svg {...common}>
-          <path d="M22 5a11 11 0 1 0 5.6 13.2A8.8 8.8 0 0 1 22 5Z" fill="#2F4A36" />
-          <path d="m10 7.5 1.1 2.8 2.8 1.1-2.8 1.1L10 15.3l-1.1-2.8L6.1 11.4l2.8-1.1Z" fill="#E8C468" />
-        </svg>
-      );
-  }
+/**
+ * The rendered clay marks that sit inside the raised badges.
+ *
+ * The asset set supplies three sun states, so Dhuhr and Asr share the full sun
+ * - both are daytime prayers, and the alternative was a mirrored sunrise that
+ * read as the same icon anyway.
+ */
+const PRAYER_ART: Record<PrayerKey, string> = {
+  fajr: '/scene/moon-crescent.webp',
+  sunrise: '/scene/sun-rising.webp',
+  dhuhr: '/scene/sun-full.webp',
+  asr: '/scene/sun-full.webp',
+  maghrib: '/scene/sun-setting.webp',
+  isha: '/scene/moon-half.webp',
+};
+
+export function PrayerGlyph({
+  prayer,
+  width = 24,
+  height = 24,
+}: {
+  prayer: PrayerKey;
+  width?: number | string;
+  height?: number | string;
+}) {
+  return (
+    <img
+      className="prayer-glyph"
+      src={PRAYER_ART[prayer]}
+      alt=""
+      aria-hidden="true"
+      style={{ width, height }}
+    />
+  );
 }

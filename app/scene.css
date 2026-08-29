@@ -93,16 +93,16 @@
 }
 
 .celestial--sun {
-  width: 17rem;
+  width: 16rem;
 }
 
-.celestial--sun .celestial__rays {
-  animation: spin 220s linear infinite;
+.celestial__spin {
+  animation: spin 260s linear infinite;
   transform-origin: 50% 50%;
 }
 
 .celestial--moon {
-  width: 11rem;
+  width: 10rem;
 }
 
 .celestial__halo {
@@ -112,15 +112,6 @@
   background: radial-gradient(circle, var(--glow) 0%, transparent 62%);
   opacity: 0.55;
   animation: breathe 9s ease-in-out infinite;
-}
-
-/* The lunar phase is carved out with a mask rather than drawn into the art,
-   so one moon image covers every night of the month. */
-.celestial__moon-disc {
-  -webkit-mask-image: var(--moon-mask);
-  mask-image: var(--moon-mask);
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
 }
 
 @keyframes spin {
@@ -185,70 +176,65 @@
 
 /* --- landscape ----------------------------------------------------- */
 
-/* The landscape is a band across the top third: below it the page is flat
-   ground, which is where the cards sit. */
+/* One rendered hill band rather than three parallax layers: the art already
+   carries its own depth, and a second copy of the same silhouette reads as a
+   repeat. Trees and bushes stand in front of it for the near distance. */
 .land {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 44%;
+  height: 48%;
 }
 
-/* Dissolves the flat bottom edge of the hill art into the ground the cards
-   stand on, so the landscape has no visible cut-off line. */
+/* Dissolves the base of the hills into the ground the cards stand on. */
 .land::after {
   content: '';
   position: absolute;
-  inset: 58% 0 -4% 0;
-  background: linear-gradient(to bottom, transparent, var(--page-bg) 74%);
+  inset: 62% 0 -4% 0;
+  background: linear-gradient(to bottom, transparent, var(--page-bg) 76%);
 }
 
-.land__band {
+.land__hills {
   position: absolute;
-  left: -4%;
+  left: -3%;
   bottom: 0;
-  width: 108%;
+  width: 106%;
   height: auto;
-  /* Tinted toward the palette so the hills darken at night with the sky. */
   filter: brightness(var(--land-bright, 1)) saturate(var(--land-sat, 1));
   transition: filter 2s linear;
 }
 
-.land__band--back { bottom: 14%; opacity: 0.92; }
-.land__band--mid { bottom: 8%; }
-.land__band--front { bottom: 2%; }
+.land__sprite {
+  position: absolute;
+  height: auto;
+  filter: brightness(var(--land-bright, 1)) saturate(var(--land-sat, 1));
+  transition: filter 2s linear;
+}
 
 .land__mosque {
   position: absolute;
   /* Placed so the dome clears the weather chip and the minaret passes just to
      its left; the reference has an empty top-right corner, this layout does not. */
-  right: 18.5%;
-  bottom: 24%;
-  width: 38rem;
+  right: 20%;
+  bottom: 40%;
+  width: 28rem;
+  aspect-ratio: 1200 / 1023;
 }
 
-/* The brightness filter belongs on the building, not on the container: applied
-   to the whole group it also dimmed the lit-window overlay to nothing, so the
-   mosque never lit up at night. */
-.land__mosque-base {
-  filter: brightness(var(--land-bright, 1));
-  transition: filter 2s linear;
-}
-
-.land__mosque img {
-  display: block;
-  width: 100%;
-  /* Without this the intrinsic height attribute survives and squashes the art. */
-  height: auto;
-}
-
-.land__mosque-glow {
+/* The two mosques are separate renders sharing one frame, cross-faded rather
+   than one image dimmed: the lit windows belong to the night render. */
+.land__mosque-day,
+.land__mosque-night {
   position: absolute;
   inset: 0;
-  opacity: var(--window-glow, 0);
-  transition: opacity 3s linear;
-  mix-blend-mode: screen;
+  width: 100%;
+  height: auto;
+  transition: opacity 2.5s linear;
+}
+
+.land__mosque-day {
+  filter: brightness(var(--land-bright, 1)) saturate(var(--land-sat, 1));
 }
 
 /* --- precipitation ------------------------------------------------- */
@@ -431,10 +417,14 @@
   }
 
   .land__mosque {
-    width: 18rem;
-    bottom: 18%;
+    width: 17rem;
+    bottom: 12%;
     right: 2%;
     opacity: 0.85;
+  }
+
+  .land__sprite {
+    display: none;
   }
 
   .celestial--sun {
