@@ -1,0 +1,439 @@
+/* ------------------------------------------------------------------ *
+ * The clay scene behind the interface.
+ *
+ * Everything here is decorative and pointer-transparent. The sun and moon are
+ * positioned from real altitude/azimuth by <CelestialBody>; the clouds,
+ * precipitation and lightning are pure CSS so they cost nothing to keep running
+ * on a display that is left on all day.
+ * ------------------------------------------------------------------ */
+
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--page-bg);
+}
+
+.scene__sky {
+  position: absolute;
+  inset: 0 0 58% 0;
+  background: linear-gradient(
+    to bottom,
+    var(--sky-top) 0%,
+    var(--sky-mid) 52%,
+    var(--sky-bottom) 100%
+  );
+  transition: background 2s linear;
+}
+
+/* Softens the seam between the sky and the page ground. */
+/* Sits between the sky and the hills, not over them: it blends the base of the
+   sky into the flat ground the cards stand on. */
+.scene__horizon {
+  position: absolute;
+  top: 18%;
+  left: 0;
+  right: 0;
+  height: 26%;
+  background: linear-gradient(to bottom, transparent, var(--page-bg) 82%);
+}
+
+.scene__stars {
+  position: absolute;
+  inset: 0 0 68% 0;
+  opacity: var(--stars, 0);
+  transition: opacity 3s linear;
+  background-image:
+    radial-gradient(1.2px 1.2px at 12% 18%, #fff, transparent),
+    radial-gradient(1.6px 1.6px at 27% 9%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 38% 30%, #fdf6e0, transparent),
+    radial-gradient(1.4px 1.4px at 52% 14%, #fff, transparent),
+    radial-gradient(1px 1px at 61% 34%, #fff, transparent),
+    radial-gradient(1.7px 1.7px at 71% 8%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 83% 24%, #f6ecd6, transparent),
+    radial-gradient(1.3px 1.3px at 92% 12%, #fff, transparent),
+    radial-gradient(1px 1px at 8% 38%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 45% 42%, #fff, transparent),
+    radial-gradient(1.1px 1.1px at 66% 46%, #fff, transparent),
+    radial-gradient(1.3px 1.3px at 19% 52%, #fff, transparent);
+  animation: twinkle 7s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  from { filter: brightness(0.75); }
+  to { filter: brightness(1.25); }
+}
+
+.scene__sunglow {
+  position: absolute;
+  top: 21%;
+  width: 90rem;
+  height: 44rem;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center, var(--glow) 0%, transparent 68%);
+  transition: opacity 4s linear, left 60s linear;
+}
+
+/* --- sun and moon -------------------------------------------------- */
+
+.celestial {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  /* Long transition so the body glides between the once-a-minute updates. */
+  transition: left 60s linear, top 60s linear, opacity 4s linear, filter 4s linear;
+  will-change: left, top;
+}
+
+.celestial img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.celestial--sun {
+  width: 17rem;
+}
+
+.celestial--sun .celestial__rays {
+  animation: spin 220s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+.celestial--moon {
+  width: 11rem;
+}
+
+.celestial__halo {
+  position: absolute;
+  inset: -70%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow) 0%, transparent 62%);
+  opacity: 0.55;
+  animation: breathe 9s ease-in-out infinite;
+}
+
+/* The lunar phase is carved out with a mask rather than drawn into the art,
+   so one moon image covers every night of the month. */
+.celestial__moon-disc {
+  -webkit-mask-image: var(--moon-mask);
+  mask-image: var(--moon-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.42; transform: scale(1); }
+  50% { opacity: 0.68; transform: scale(1.06); }
+}
+
+/* --- clouds -------------------------------------------------------- */
+
+.clouds {
+  position: absolute;
+  inset: 0 0 72% 0;
+}
+
+.cloud {
+  position: absolute;
+  top: var(--top);
+  left: 0;
+  width: var(--size);
+  opacity: var(--opacity);
+  animation: drift var(--dur) linear infinite;
+  animation-delay: var(--delay);
+  will-change: transform;
+}
+
+.cloud img {
+  display: block;
+  width: 100%;
+  height: auto;
+  animation: bob calc(var(--dur) / 9) ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  from { transform: translateX(-30vw); }
+  to { transform: translateX(115vw); }
+}
+
+@keyframes bob {
+  from { transform: translateY(-0.6rem); }
+  to { transform: translateY(0.8rem); }
+}
+
+/* --- birds --------------------------------------------------------- */
+
+.birds {
+  position: absolute;
+  top: 11%;
+  left: 0;
+  width: 12rem;
+  opacity: 0.7;
+  animation: drift 190s linear infinite;
+}
+
+.birds img {
+  width: 100%;
+  animation: bob 6s ease-in-out infinite alternate;
+}
+
+/* --- landscape ----------------------------------------------------- */
+
+/* The landscape is a band across the top third: below it the page is flat
+   ground, which is where the cards sit. */
+.land {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44%;
+}
+
+/* Dissolves the flat bottom edge of the hill art into the ground the cards
+   stand on, so the landscape has no visible cut-off line. */
+.land::after {
+  content: '';
+  position: absolute;
+  inset: 58% 0 -4% 0;
+  background: linear-gradient(to bottom, transparent, var(--page-bg) 74%);
+}
+
+.land__band {
+  position: absolute;
+  left: -4%;
+  bottom: 0;
+  width: 108%;
+  height: auto;
+  /* Tinted toward the palette so the hills darken at night with the sky. */
+  filter: brightness(var(--land-bright, 1)) saturate(var(--land-sat, 1));
+  transition: filter 2s linear;
+}
+
+.land__band--back { bottom: 20%; opacity: 0.92; }
+.land__band--mid { bottom: 13%; }
+.land__band--front { bottom: 6%; }
+
+.land__mosque {
+  position: absolute;
+  right: 4.5%;
+  bottom: 30%;
+  width: 34rem;
+  filter: brightness(var(--land-bright, 1));
+  transition: filter 2s linear;
+}
+
+.land__mosque img {
+  display: block;
+  width: 100%;
+  /* Without this the intrinsic height attribute survives and squashes the art. */
+  height: auto;
+}
+
+.land__mosque-glow {
+  position: absolute;
+  inset: 0;
+  opacity: var(--window-glow, 0);
+  transition: opacity 3s linear;
+  mix-blend-mode: screen;
+}
+
+/* --- precipitation ------------------------------------------------- */
+
+.precip {
+  position: absolute;
+  inset: 0 0 52% 0;
+  opacity: var(--precip-opacity, 0);
+  transition: opacity 2.5s linear;
+  /* Fades out at the bottom instead of ending on a hard line. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent);
+}
+
+.precip__rain {
+  position: absolute;
+  inset: -20% -10% 0 -10%;
+  background-image: repeating-linear-gradient(
+    104deg,
+    transparent 0 12px,
+    rgba(174, 202, 220, 0.72) 12px 13px,
+    transparent 13px 24px
+  );
+  background-size: 100% 120px;
+  animation: rainfall var(--rain-speed, 0.55s) linear infinite;
+}
+
+.precip__rain--far {
+  opacity: 0.5;
+  filter: blur(1px);
+  animation-duration: calc(var(--rain-speed, 0.55s) * 1.9);
+  background-size: 100% 180px;
+}
+
+@keyframes rainfall {
+  to { background-position: -60px 120px; }
+}
+
+.precip__snow {
+  position: absolute;
+  inset: -10% 0 0 0;
+  background-image:
+    radial-gradient(3px 3px at 12% 10%, #fff, transparent),
+    radial-gradient(2px 2px at 33% 26%, #fff, transparent),
+    radial-gradient(3.5px 3.5px at 58% 12%, #fff, transparent),
+    radial-gradient(2.5px 2.5px at 77% 30%, #fff, transparent),
+    radial-gradient(3px 3px at 91% 18%, #fff, transparent);
+  background-size: 340px 340px;
+  animation: snowfall 14s linear infinite;
+}
+
+.precip__snow--far {
+  opacity: 0.6;
+  background-size: 220px 220px;
+  animation-duration: 22s;
+}
+
+@keyframes snowfall {
+  to { background-position: 60px 340px; }
+}
+
+/* --- fog and storm ------------------------------------------------- */
+
+.fog {
+  position: absolute;
+  inset: 0;
+  opacity: var(--fog-opacity, 0);
+  transition: opacity 3s linear;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(226, 224, 214, 0.5) 45%,
+    rgba(226, 224, 214, 0.82) 78%,
+    rgba(226, 224, 214, 0.4) 100%
+  );
+  backdrop-filter: blur(2px);
+}
+
+.fog__band {
+  position: absolute;
+  left: -20%;
+  width: 140%;
+  height: 18%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.7), transparent 70%);
+  filter: blur(12px);
+  animation: fogdrift 46s ease-in-out infinite alternate;
+}
+
+.fog__band:nth-child(1) { top: 46%; animation-duration: 52s; }
+.fog__band:nth-child(2) { top: 58%; animation-duration: 68s; animation-direction: alternate-reverse; }
+.fog__band:nth-child(3) { top: 70%; animation-duration: 40s; }
+
+@keyframes fogdrift {
+  from { transform: translateX(-8%); }
+  to { transform: translateX(8%); }
+}
+
+.lightning {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255, 253, 240, 0.9), rgba(255, 253, 240, 0.1));
+  opacity: 0;
+  animation: strike 11s linear infinite;
+}
+
+/* Two quick flashes, then a long dark gap - a single fade reads as a lamp. */
+@keyframes strike {
+  0%, 3.2% { opacity: 0; }
+  3.4% { opacity: 0.72; }
+  3.9% { opacity: 0.06; }
+  4.3% { opacity: 0.55; }
+  5.4% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.scene__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 42%, transparent 52%, rgba(20, 16, 10, 0.16) 100%);
+}
+
+/* --- announcement takeover ----------------------------------------- */
+
+.announce {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--page-bg) 72%, transparent);
+  backdrop-filter: blur(14px);
+  animation: fadein 0.5s ease;
+}
+
+.announce__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6rem;
+  padding: 6rem 8rem;
+  text-align: center;
+}
+
+.announce__icon {
+  width: 14rem;
+  height: 14rem;
+  animation: breathe 2.6s ease-in-out infinite;
+}
+
+.announce__name {
+  font-size: 8rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+}
+
+.announce__sub {
+  font-size: 2.4rem;
+  color: var(--accent);
+  margin: 0;
+}
+
+.announce__dismiss {
+  margin-top: 1.6rem;
+  padding: 1.2rem 3.2rem;
+  border-radius: 999rem;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 1.9rem;
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 1000px) {
+  /* The mosque would sit behind the wordmark on a phone. */
+  .land {
+    height: 30%;
+  }
+
+  .land__mosque {
+    width: 18rem;
+    bottom: 18%;
+    right: 2%;
+    opacity: 0.85;
+  }
+
+  .celestial--sun {
+    width: 11rem;
+  }
+
+  .celestial--moon {
+    width: 8rem;
+  }
+}

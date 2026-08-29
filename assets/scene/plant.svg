@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400" width="320" height="400">
+  <defs>
+    
+  <linearGradient id="p-body" x1="0.15" y1="0" x2="0.85" y2="1">
+    <stop offset="0" stop-color="#FDF6E8"/>
+    <stop offset="0.55" stop-color="#F0E2C8"/>
+    <stop offset="1" stop-color="#DCC7A4"/>
+  </linearGradient>
+  <radialGradient id="p-dome" cx="0.34" cy="0.24" r="0.85">
+    <stop offset="0" stop-color="#FDF6E8"/>
+    <stop offset="0.5" stop-color="#F0E2C8"/>
+    <stop offset="1" stop-color="#B79E77"/>
+  </radialGradient>
+  <linearGradient id="p-deep" x1="0" y1="0" x2="0.6" y2="1">
+    <stop offset="0" stop-color="#DCC7A4"/>
+    <stop offset="1" stop-color="#B79E77"/>
+  </linearGradient>
+  <filter id="p-soft" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="6" dy="12" stdDeviation="14" flood-color="#B79E77" flood-opacity="0.38"/>
+  </filter>
+  <filter id="p-inner" x="-30%" y="-30%" width="160%" height="160%">
+    <feGaussianBlur stdDeviation="9"/>
+  </filter>
+  <filter id="p-glow" x="-80%" y="-80%" width="260%" height="260%">
+    <feGaussianBlur stdDeviation="16"/>
+  </filter>
+    <linearGradient id="leaf" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#A9C48F"/>
+      <stop offset="0.55" stop-color="#7D9E68"/>
+      <stop offset="1" stop-color="#4F7043"/>
+    </linearGradient>
+  </defs>
+  <g filter="url(#p-soft)">
+    <g fill="url(#leaf)">
+      <path d="M160 210 C 96 196 62 138 78 78 C 140 84 176 132 168 200 Z"/>
+      <path d="M168 214 C 232 196 268 142 250 84 C 190 92 156 142 164 206 Z"/>
+      <path d="M162 216 C 116 250 74 244 50 206 C 92 176 140 180 160 210 Z"/>
+      <path d="M168 220 C 214 252 258 246 282 208 C 240 178 190 184 170 214 Z"/>
+      <path d="M164 216 C 158 156 176 108 210 74 C 226 128 210 186 172 218 Z" opacity="0.9"/>
+    </g>
+    <path d="M96 268 L 224 268 L 206 372 C 204 386 194 394 180 394 L 140 394 C 126 394 116 386 114 372 Z" fill="url(#p-body)"/>
+    <rect x="84" y="248" width="152" height="34" rx="16" fill="url(#p-dome)"/>
+    <path d="M116 286 C 110 320 112 350 120 378" stroke="#FFFDF4" stroke-opacity="0.5" stroke-width="14"
+          stroke-linecap="round" fill="none" filter="url(#p-inner)"/>
+  </g>
+</svg>

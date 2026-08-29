@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" width="900" height="760">
+  <defs>
+    
+  <linearGradient id="m-body" x1="0.15" y1="0" x2="0.85" y2="1">
+    <stop offset="0" stop-color="#FDF6E8"/>
+    <stop offset="0.55" stop-color="#F0E2C8"/>
+    <stop offset="1" stop-color="#DCC7A4"/>
+  </linearGradient>
+  <radialGradient id="m-dome" cx="0.34" cy="0.24" r="0.85">
+    <stop offset="0" stop-color="#FDF6E8"/>
+    <stop offset="0.5" stop-color="#F0E2C8"/>
+    <stop offset="1" stop-color="#B79E77"/>
+  </radialGradient>
+  <linearGradient id="m-deep" x1="0" y1="0" x2="0.6" y2="1">
+    <stop offset="0" stop-color="#DCC7A4"/>
+    <stop offset="1" stop-color="#B79E77"/>
+  </linearGradient>
+  <filter id="m-soft" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="6" dy="12" stdDeviation="14" flood-color="#B79E77" flood-opacity="0.38"/>
+  </filter>
+  <filter id="m-inner" x="-30%" y="-30%" width="160%" height="160%">
+    <feGaussianBlur stdDeviation="9"/>
+  </filter>
+  <filter id="m-glow" x="-80%" y="-80%" width="260%" height="260%">
+    <feGaussianBlur stdDeviation="16"/>
+  </filter>
+    
+  <linearGradient id="g-body" x1="0.15" y1="0" x2="0.85" y2="1">
+    <stop offset="0" stop-color="#FBE6A6"/>
+    <stop offset="0.55" stop-color="#EFC65C"/>
+    <stop offset="1" stop-color="#D9A233"/>
+  </linearGradient>
+  <radialGradient id="g-dome" cx="0.34" cy="0.24" r="0.85">
+    <stop offset="0" stop-color="#FBE6A6"/>
+    <stop offset="0.5" stop-color="#EFC65C"/>
+    <stop offset="1" stop-color="#A97A1E"/>
+  </radialGradient>
+  <linearGradient id="g-deep" x1="0" y1="0" x2="0.6" y2="1">
+    <stop offset="0" stop-color="#D9A233"/>
+    <stop offset="1" stop-color="#A97A1E"/>
+  </linearGradient>
+  <filter id="g-soft" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="6" dy="12" stdDeviation="14" flood-color="#A97A1E" flood-opacity="0.38"/>
+  </filter>
+  <filter id="g-inner" x="-30%" y="-30%" width="160%" height="160%">
+    <feGaussianBlur stdDeviation="9"/>
+  </filter>
+  <filter id="g-glow" x="-80%" y="-80%" width="260%" height="260%">
+    <feGaussianBlur stdDeviation="16"/>
+  </filter>
+    <linearGradient id="window-lit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#B9A382"/>
+      <stop offset="1" stop-color="#8C7355"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#m-soft)">
+    <!-- main hall -->
+    <rect x="150" y="430" width="470" height="300" rx="30" fill="url(#m-body)"/>
+    <!-- side wings -->
+    <rect x="96" y="520" width="80" height="210" rx="26" fill="url(#m-deep)" opacity="0.85"/>
+    <rect x="600" y="520" width="86" height="210" rx="26" fill="url(#m-deep)" opacity="0.85"/>
+
+    <!-- drum + main dome -->
+    <rect x="270" y="368" width="228" height="80" rx="22" fill="url(#m-body)"/>
+    <path d="M384 150 C 512 150 552 268 552 372 L 216 372 C 216 268 256 150 384 150 Z" fill="url(#m-dome)"/>
+    <!-- dome highlight -->
+    <path d="M330 200 C 300 246 288 300 288 350" stroke="#FFFBF0" stroke-opacity="0.55" stroke-width="26"
+          stroke-linecap="round" fill="none" filter="url(#m-inner)"/>
+    <!-- dome underside shade -->
+    <path d="M470 210 C 512 262 524 320 524 366 L 470 366 Z" fill="#B79E77" opacity="0.22" filter="url(#m-inner)"/>
+
+    <!-- small domes -->
+    <path d="M188 452 C 232 452 246 494 246 524 L 130 524 C 130 494 144 452 188 452 Z" fill="url(#m-dome)"/>
+    <path d="M642 452 C 686 452 700 494 700 524 L 584 524 C 584 494 598 452 642 452 Z" fill="url(#m-dome)"/>
+
+    <!-- minaret -->
+    <rect x="742" y="230" width="74" height="500" rx="26" fill="url(#m-body)"/>
+    <rect x="730" y="352" width="98" height="34" rx="16" fill="url(#m-deep)"/>
+    <path d="M779 96 L 828 236 L 730 236 Z" fill="url(#m-dome)"/>
+    <rect x="762" y="252" width="34" height="84" rx="16" fill="#B79E77" opacity="0.28"/>
+  </g>
+
+  <!-- arched openings; these are the windows that light up at night -->
+  <g id="windows">
+    <path d="M385 520 C 425 520 442 552 442 588 L 442 700 L 328 700 L 328 588 C 328 552 345 520 385 520 Z" fill="url(#window-lit)"/>
+    <path d="M232 592 C 258 592 270 614 270 638 L 270 700 L 194 700 L 194 638 C 194 614 206 592 232 592 Z" fill="url(#window-lit)"/>
+    <path d="M540 592 C 566 592 578 614 578 638 L 578 700 L 502 700 L 502 638 C 502 614 514 592 540 592 Z" fill="url(#window-lit)"/>
+    <path d="M779 268 C 792 268 798 280 798 294 L 798 330 L 760 330 L 760 294 C 760 280 766 268 779 268 Z" fill="url(#window-lit)"/>
+  </g>
+
+  <!-- finials -->
+  <g fill="url(#g-body)" filter="url(#g-soft)">
+    <path d="M384 92 a30 30 0 1 0 26 45 a24 24 0 1 1 -20 -37 a30 30 0 0 1 -6 -8 Z"/>
+    <path d="M779 44 a22 22 0 1 0 19 33 a18 18 0 1 1 -15 -27 a22 22 0 0 1 -4 -6 Z"/>
+  </g>
+</svg>
