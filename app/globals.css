@@ -105,6 +105,11 @@ button {
     inset 0 -0.2rem 0 var(--clay-light);
 }
 
+.prayer-glyph {
+  display: block;
+  object-fit: contain;
+}
+
 /* A raised circular badge, the recurring motif in the design. */
 .clay-badge {
   display: grid;
@@ -211,28 +216,28 @@ button {
   min-height: 0;
 }
 
+/* The arch and the plant are rendered in the light-mode card green, so they
+   need the same dimming the card gets in dark mode. */
 .countdown__art {
   position: absolute;
-  right: -1rem;
-  bottom: 0;
-  height: 78%;
   pointer-events: none;
   user-select: none;
+  filter: brightness(var(--ornament-bright, 1));
+  transition: filter 1.4s linear;
 }
 
 .countdown__arch {
   position: absolute;
-  right: 7rem;
-  bottom: 9%;
-  height: 66%;
-  opacity: 0.8;
+  right: 8rem;
+  bottom: 7%;
+  height: 68%;
 }
 
 .countdown__plant {
   position: absolute;
-  right: 3rem;
-  bottom: 7%;
-  height: 24%;
+  right: 2.5rem;
+  bottom: 6%;
+  height: 26%;
 }
 
 .countdown__head {
@@ -521,16 +526,19 @@ button {
   margin: 1.2rem 0 0;
 }
 
+/* The calligraphy is rendered in the light-mode card green, so it needs the
+   same dimming the card gets in dark mode to stay a relief rather than a patch. */
 .verse__glyph {
   position: absolute;
-  right: 2.4rem;
-  bottom: 1.2rem;
-  font-size: 7rem;
-  line-height: 1;
-  opacity: 0.12;
+  right: 2.6rem;
+  bottom: 2rem;
+  height: 9.5rem;
+  width: auto;
+  opacity: 0.9;
   pointer-events: none;
   user-select: none;
-  font-family: 'Amiri', 'Noto Naskh Arabic', serif;
+  filter: brightness(var(--ornament-bright, 1));
+  transition: filter 1.4s linear;
 }
 
 /* --- weather chip -------------------------------------------------- */

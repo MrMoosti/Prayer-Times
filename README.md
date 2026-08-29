@@ -11,10 +11,9 @@ weather for the configured city.
 | ![Just after Maghrib](docs/post-maghrib.webp) | ![Night](docs/night.webp) |
 | ![Thunderstorm](docs/thunder.webp) | ![Dawn](docs/dawn.webp) |
 
-Built with Next.js (App Router) and no UI framework — the clay look is a small
-set of CSS custom properties and shadows in `app/globals.css`. Type is
-[Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans) with
-[Amiri](https://fonts.google.com/specimen/Amiri) for the Arabic watermark, both
+Built with Next.js (App Router) and no UI framework — the clay look is rendered
+art over a small set of CSS custom properties and shadows in `app/globals.css`.
+Type is [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans),
 self-hosted from npm so the Docker build never reaches for Google Fonts.
 
 ## Running it
@@ -208,53 +207,45 @@ driven by real values rather than a time-of-day preset:
   sky above the cards; the horizontal arc is centred right of screen centre to
   clear the logo.
 - **Weather** — the WMO code from Open-Meteo picks cloud density, rain, sleet,
-  snow, fog, and the lightning flash, and mutes the palette
-  (`lib/weather.ts`). Clouds drift on independent slow loops.
+  snow, fog, and the lightning flash, and mutes the palette (`lib/weather.ts`).
+  Clouds drift on independent slow loops, and the lower ones swap to the
+  raining render when it is wet.
 
 ## Artwork
 
-The layers in `public/scene/` are transparent WebP, generated from SVG authored
-in `scripts/scene-art.mjs`. Three things carry the clay look and are applied to
-every form: a soft two-stop gradient, a blurred highlight where the light
-falls, and a fine `feTurbulence` grain multiplied back over the shape — without
-that last one the art reads as flat vector rather than matte felt.
+The scene is built from rendered clay art, not vector illustration. Masters live
+in `assets/scene/` as trimmed lossless WebP; `public/scene/` holds the display
+copies the app actually serves.
 
 ```bash
-npm run scene    # writes assets/scene/*.svg and public/scene/*.webp
+npm run scene    # assets/scene/*.webp -> public/scene/*.webp
 ```
 
-The generated files are committed, so a fresh clone runs without this step —
-re-run it after editing the art. To use your own renders instead, drop
-replacements into `public/scene/` under the same names; the scene component only
-knows about the filenames.
+The build step resizes each master to roughly twice its largest on-screen size
+and re-encodes it lossily — 18 layers, about 650 kB in total. The generated
+files are committed, so a fresh clone runs without this step; re-run it after
+replacing a master.
 
-## Deploying
+To swap in your own art, replace the master of the same name and re-run. A few
+layers have contracts worth knowing:
 
-### Coolify
-
-1. **New Resource → Docker Compose**, pointed at this repository. It picks up
-   `docker-compose.yml`.
-2. In **Environment Variables**, set `DIYANET_EMAIL` and `DIYANET_PASSWORD`
-   (skip if you are staying on Aladhan).
-3. Deploy. Coolify substitutes `SERVICE_FQDN_MEKTEP_3000` with the domain it
-   assigns and routes its proxy to port 3000, so no host port is published.
-
-The compose file declares a `prayer-cache` volume on `/app/.cache`. Leave it
-in place: it holds the cached calendars, the Diyanet token and the quota
-counter. Keep the replica count at 1.
-
-`/api/health` backs both the container healthcheck and Coolify's.
-
-### Plain Docker
-
-```bash
-cp .env.example .env
-docker compose -f docker-compose.standalone.yml up -d --build
-```
-
-Publishes on `${PORT:-3000}`. The image is a multi-stage build on
-`node:22-bookworm-slim` shipping Next's `standalone` output, and runs as a
-non-root user.
+- **`mosque-day` / `mosque-night`** are two renders of the same building that
+  cross-fade at Maghrib, so the night one carries the lit windows. The build
+  pads both onto one frame, bottom aligned on the ground line, or they jump as
+  they fade.
+- **`arch`, `plant` and `calligraphy`** sit on the deep green card and are
+  rendered *in that green*, which is what makes them read as relief rather than
+  as stickers. In dark mode they are dimmed by the same amount the card is
+  (`--ornament-bright`).
+- **`moon-crescent` / `-half` / `-gibbous` / `-full`** are picked by the moon's
+  real illuminated fraction. They are lit from the left — a waning moon — so a
+  waxing moon is the same art mirrored.
+- **`sun-rising` / `sun-setting`** include a mound at the base, which makes them
+  icons rather than sky elements: they are the Sunrise and Maghrib row marks.
+  `sun-full` is both the sky sun and the Dhuhr/Asr mark.
+- **`landscape`** is one band carrying its own depth, with `tree` and `bushes`
+  scattered in front of it. A second copy for parallax would read as a repeat of
+  the same silhouette.
 
 ## Layout
 

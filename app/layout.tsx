@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next';
 // Self-hosted rather than pulled from Google at build time, so the Docker
 // build needs nothing but the npm registry.
 import '@fontsource-variable/plus-jakarta-sans';
-import '@fontsource/amiri/400.css';
 import { SettingsProvider } from '@/lib/useSettings';
 import './globals.css';
 import './scene.css';

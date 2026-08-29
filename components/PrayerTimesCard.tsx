@@ -43,7 +43,7 @@ export default function PrayerTimesCard({
                   data-passed={entry.passed}
                 >
                   <span className="clay-badge row__icon">
-                    <PrayerGlyph prayer={entry.key} width={24} height={24} />
+                    <PrayerGlyph prayer={entry.key} width={29} height={29} />
                   </span>
                   <span className="row__name">{PRAYER_LABELS[entry.key].name}</span>
                   <span className="row__time">
