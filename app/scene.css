@@ -217,11 +217,14 @@
 .land__mosque {
   position: absolute;
   /* Placed so the dome clears the weather chip and the minaret passes just to
-     its left; the reference has an empty top-right corner, this layout does not. */
+     its left; the reference has an empty top-right corner, this layout does not.
+     Dropped low enough that the base of the stairs lands just above the top of
+     the Today's Prayer Times card. z-index keeps it clear of the land fade. */
   right: 20%;
-  bottom: 28%;
+  bottom: 24%;
   width: 28rem;
   aspect-ratio: 1200 / 1023;
+  z-index: 1;
 }
 
 /* The two mosques are separate renders sharing one frame, cross-faded rather

@@ -1,29 +1,31 @@
 'use client';
 
-import { BellIcon, ChevronRight, PrayerGlyph } from './icons';
+import { PrayerGlyph } from './icons';
+import { prayerLabels, strings } from '@/lib/i18n';
 import { formatCountdown } from '@/lib/time';
-import { PRAYER_LABELS } from '@/lib/types';
+import type { Settings } from '@/lib/types';
 import type { Schedule } from '@/lib/prayer';
 
 interface Props {
   schedule: Schedule | null;
+  settings: Settings;
   now: number;
-  audioArmed: boolean;
-  onArmAudio: () => void;
 }
 
-export default function CountdownCard({ schedule, now, audioArmed, onArmAudio }: Props) {
+export default function CountdownCard({ schedule, settings, now }: Props) {
+  const t = strings(settings.language);
+  const labels = prayerLabels(settings.language);
   const next = schedule?.next;
   const nextAt = schedule?.nextAt ?? null;
   const countdown = formatCountdown(nextAt != null ? nextAt - now : 0);
-  const label = next ? PRAYER_LABELS[next.key] : null;
+  const label = next ? labels[next.key] : null;
   // Sunrise is on the list but it is not a prayer, so the eyebrow softens.
   // After Isha the next prayer is tomorrow's, and the card says so.
   const eyebrow = next?.tomorrow
-    ? 'Next prayer · tomorrow'
+    ? t.nextPrayerTomorrow
     : next?.key === 'sunrise'
-      ? 'Next'
-      : 'Next prayer';
+      ? t.next
+      : t.nextPrayer;
 
   return (
     <section className="clay clay-deep countdown">
@@ -37,20 +39,14 @@ export default function CountdownCard({ schedule, now, audioArmed, onArmAudio }:
         <div>
           <p className="countdown__eyebrow">{eyebrow}</p>
           <h2 className="countdown__name">{label?.name ?? '—'}</h2>
-          <p className="countdown__subtitle">{label?.subtitle ?? 'Loading times'}</p>
+          <p className="countdown__subtitle">{label?.subtitle ?? t.loadingTimes}</p>
         </div>
       </div>
 
       <div className="countdown__rule" />
 
-      <p className="countdown__label">Next prayer in</p>
+      <p className="countdown__label">{t.nextPrayerIn}</p>
       <div className="countdown__value">{nextAt != null ? countdown.hhmm : '--:--'}</div>
-
-      <button type="button" className="countdown__cta" onClick={onArmAudio} data-active={audioArmed}>
-        <BellIcon width={28} height={28} aria-hidden="true" />
-        <span>{audioArmed ? 'Prayer announcements on' : 'Enable prayer notifications'}</span>
-        <ChevronRight className="countdown__cta-arrow" width={26} height={26} aria-hidden="true" />
-      </button>
     </section>
   );
 }

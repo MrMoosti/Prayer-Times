@@ -1,4 +1,5 @@
 import type { HighLatitudeRule } from './solar';
+import type { Language } from './i18n';
 
 export const PRAYER_KEYS = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'] as const;
 export type PrayerKey = (typeof PRAYER_KEYS)[number];
@@ -8,15 +9,6 @@ export const PRAYABLE_KEYS = PRAYER_KEYS.filter((k) => k !== 'sunrise') as Exclu
   PrayerKey,
   'sunrise'
 >[];
-
-export const PRAYER_LABELS: Record<PrayerKey, { name: string; subtitle: string }> = {
-  fajr: { name: 'Fajr', subtitle: 'Dawn prayer' },
-  sunrise: { name: 'Sunrise', subtitle: 'Fajr ends' },
-  dhuhr: { name: 'Dhuhr', subtitle: 'Midday prayer' },
-  asr: { name: 'Asr', subtitle: 'Afternoon prayer' },
-  maghrib: { name: 'Maghrib', subtitle: 'Evening prayer' },
-  isha: { name: 'Isha', subtitle: 'Night prayer' },
-};
 
 export interface LocationSetting {
   name: string;
@@ -41,6 +33,8 @@ export interface DiyanetPlaceSetting {
 
 export interface Settings {
   location: LocationSetting;
+  /** Interface language. Also decides whether prayer names are localised. */
+  language: Language;
   /** When set and the server has credentials, times come from Diyanet. */
   diyanet: DiyanetPlaceSetting | null;
   /** Aladhan calculation method id. 13 = Diyanet Isleri Baskanligi. */
@@ -52,8 +46,6 @@ export interface Settings {
   adhanEnabled: Record<PrayerKey, boolean>;
   notificationsEnabled: boolean;
   clock24h: boolean;
-  /** 'auto' switches to dark at Maghrib and back at sunrise. */
-  theme: 'auto' | 'light' | 'dark';
   showWeather: boolean;
   reducedMotion: boolean;
 }

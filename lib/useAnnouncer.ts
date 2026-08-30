@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { playAdhan } from './adhan';
-import { PRAYER_LABELS, type PrayerKey, type Settings } from './types';
+import { prayerLabels } from './i18n';
+import type { PrayerKey, Settings } from './types';
 import type { Schedule } from './prayer';
 
 const LAST_KEY = 'mektep-prayer.lastAnnounced';
@@ -55,8 +56,9 @@ export function useAnnouncer(
 
       if (settings.notificationsEnabled && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
         try {
-          new Notification(`${PRAYER_LABELS[key].name} — ${settings.location.name}`, {
-            body: `It is time for ${PRAYER_LABELS[key].name}.`,
+          const name = prayerLabels(settings.language)[key].name;
+          new Notification(`${name} — ${settings.location.name}`, {
+            body: `${name} · ${settings.location.name}`,
             tag: `prayer-${key}-${at}`,
             silent: true,
           });
@@ -65,7 +67,7 @@ export function useAnnouncer(
         }
       }
     },
-    [settings.notificationsEnabled, settings.location.name],
+    [settings.notificationsEnabled, settings.location.name, settings.language],
   );
 
   useEffect(() => {

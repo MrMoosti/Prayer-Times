@@ -1,4 +1,5 @@
 import { DEFAULT_LOCATION } from './cities';
+import { LANGUAGES, type Language } from './i18n';
 import { PRAYER_KEYS, type PrayerKey, type Settings } from './types';
 
 const STORAGE_KEY = 'mektep-prayer.settings.v1';
@@ -29,6 +30,7 @@ export const HIGH_LATITUDE_LABELS: Record<Settings['highLatitudeRule'], string> 
 
 export const DEFAULT_SETTINGS: Settings = {
   location: DEFAULT_LOCATION,
+  language: 'tr',
   diyanet: null,
   method: 13,
   highLatitudeRule: 'oneSeventh',
@@ -36,7 +38,6 @@ export const DEFAULT_SETTINGS: Settings = {
   adhanEnabled: defaultAdhan(),
   notificationsEnabled: false,
   clock24h: true,
-  theme: 'auto',
   showWeather: true,
   reducedMotion: false,
 };
@@ -54,10 +55,15 @@ export function normalizeSettings(input: unknown): Settings {
   const diyanet =
     stored.diyanet && Number.isFinite(stored.diyanet.cityId) ? stored.diyanet : null;
 
+  const language: Language = LANGUAGES.includes(stored.language as Language)
+    ? (stored.language as Language)
+    : DEFAULT_SETTINGS.language;
+
   return {
     ...DEFAULT_SETTINGS,
     ...stored,
     location: valid ? location : DEFAULT_SETTINGS.location,
+    language,
     diyanet,
     offsets: { ...zeroOffsets(), ...(stored.offsets ?? {}) },
     adhanEnabled: { ...defaultAdhan(), ...(stored.adhanEnabled ?? {}) },

@@ -140,19 +140,11 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
       ? describeWeather(weather.code, weather.cloudCover, sunAlt < -6)
       : CLEAR_EFFECTS;
 
-    // A pinned theme also pins the sky, so "dark mode" is not a bright sky
-    // behind dark cards.
-    const forced =
-      settings.theme === 'light'
-        ? Math.max(sunAlt, 25)
-        : settings.theme === 'dark'
-          ? Math.min(sunAlt, -30)
-          : sunAlt;
-    const sky = applyWeather(skyFor(forced, rising), effects.cloudiness, effects.fog);
+    const sky = applyWeather(skyFor(sunAlt, rising), effects.cloudiness, effects.fog);
 
     // One brightness value carries the whole landscape from noon to midnight,
     // rather than a second set of night-time art.
-    const bright = Math.max(0.32, Math.min(1.05, 0.36 + (forced + 12) / 26));
+    const bright = Math.max(0.32, Math.min(1.05, 0.36 + (sunAlt + 12) / 26));
 
     return {
       sky,
@@ -164,9 +156,9 @@ export default function SceneBackground({ settings, weather, minuteNow, dark, on
       moonPos: project(moonAlt, moon.azimuth * DEG),
       moon: moonArt(moon.fraction, moon.phase),
       bright,
-      phase: skyPhase(forced, rising),
+      phase: skyPhase(sunAlt, rising),
     };
-  }, [latitude, longitude, minuteNow, weather, settings.theme]);
+  }, [latitude, longitude, minuteNow, weather]);
 
   const clouds = useMemo(
     () => buildClouds(scene.effects.cloudiness, scene.effects.precipitation > 0),

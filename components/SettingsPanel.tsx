@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import DiyanetPicker from './DiyanetPicker';
 import { CloseIcon, PrayerGlyph } from './icons';
+import { LANGUAGES, LANGUAGE_LABELS, prayerLabels, strings, type Language } from '@/lib/i18n';
 import { CALCULATION_METHODS, HIGH_LATITUDE_LABELS } from '@/lib/settings';
 import {
   PRAYABLE_KEYS,
   PRAYER_KEYS,
-  PRAYER_LABELS,
   type LocationSetting,
   type PrayerKey,
   type Settings,
@@ -54,8 +54,16 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
   const [locating, setLocating] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
 
+  const t = strings(settings.language);
+  const labels = prayerLabels(settings.language);
+
+  // Focus the close button once, when the drawer opens — not on every render,
+  // or it would steal focus back from the fields the moment you start typing.
   useEffect(() => {
     closeRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
@@ -123,7 +131,7 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
   };
 
   const source = !calendar
-    ? 'Loading'
+    ? t.timesSourceLoading
     : calendar.source === 'diyanet'
       ? `Diyanet · ${calendar.officialDays ?? 0} official days, rest calculated`
       : calendar.source === 'aladhan'
@@ -133,15 +141,15 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
   return (
     <>
       <div className="drawer__scrim" onClick={onClose} />
-      <aside className="drawer" role="dialog" aria-modal="true" aria-label="Settings">
+      <aside className="drawer" role="dialog" aria-modal="true" aria-label={t.settings}>
         <div className="drawer__head">
-          <h2 className="drawer__title">Settings</h2>
+          <h2 className="drawer__title">{t.settings}</h2>
           <button
             ref={closeRef}
             type="button"
             className="icon-button"
             onClick={onClose}
-            aria-label="Close settings"
+            aria-label={t.closeSettings}
           >
             <CloseIcon width={26} height={26} />
           </button>
@@ -149,21 +157,40 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
 
         <div className="drawer__body">
           <div className="field">
+            <label className="field__label" htmlFor="language">
+              {t.language}
+            </label>
+            <p className="field__hint">{t.languageHint}</p>
+            <div className="segmented">
+              {LANGUAGES.map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  aria-pressed={settings.language === lang}
+                  onClick={() => onChange({ language: lang as Language })}
+                >
+                  {LANGUAGE_LABELS[lang]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="field">
             <label className="field__label" htmlFor="city">
-              Location
+              {t.location}
             </label>
             <p className="field__hint">
-              Used for prayer times, the weather and the position of the sun and moon. Currently{' '}
-              <strong>
-                {settings.location.name}
-                {settings.location.country ? `, ${settings.location.country}` : ''}
-              </strong>{' '}
-              ({settings.location.timezone}).
+              {t.locationCurrently(
+                `${settings.location.name}${
+                  settings.location.country ? `, ${settings.location.country}` : ''
+                }`,
+                settings.location.timezone,
+              )}
             </p>
             <input
               id="city"
               className="input"
-              placeholder="Search for a city…"
+              placeholder={t.searchCity}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               autoComplete="off"
@@ -186,10 +213,10 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
                   </button>
                 );
               })}
-              {!results.length && !searching && <p className="field__hint">No cities matched.</p>}
+              {!results.length && !searching && <p className="field__hint">{t.noCitiesMatched}</p>}
             </div>
             <button type="button" className="button-ghost" onClick={useMyLocation} disabled={locating}>
-              {locating ? 'Locating…' : 'Use my current location'}
+              {locating ? t.locating : t.useMyLocation}
             </button>
           </div>
 
@@ -197,12 +224,9 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
 
           <div className="field">
             <label className="field__label" htmlFor="method">
-              Calculation method
+              {t.calculationMethod}
             </label>
-            <p className="field__hint">
-              Used by Aladhan and by the local calculation. Ignored while a Diyanet place is
-              selected — those times come straight from Diyanet.
-            </p>
+            <p className="field__hint">{t.calculationMethodHint}</p>
             <select
               id="method"
               className="select"
@@ -219,12 +243,9 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
 
           <div className="field">
             <label className="field__label" htmlFor="highlat">
-              High latitude rule
+              {t.highLatitudeRule}
             </label>
-            <p className="field__hint">
-              Above about 48° the sun never dips far enough below the horizon in summer for Fajr and
-              Isha to have an astronomical time. This decides what is shown instead.
-            </p>
+            <p className="field__hint">{t.highLatitudeRuleHint}</p>
             <select
               id="highlat"
               className="select"
@@ -242,27 +263,32 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
           </div>
 
           <div className="field">
-            <span className="field__label">Time offsets</span>
-            <p className="field__hint">
-              Minutes added to each time. This shifts the displayed time and delays the announcement
-              with it — set +5 on Dhuhr to call it five minutes after the calculated time.
-            </p>
+            <span className="field__label">{t.timeOffsets}</span>
+            <p className="field__hint">{t.timeOffsetsHint}</p>
             <div className="offsets">
               {PRAYER_KEYS.map((key) => (
                 <div key={key} className="offset">
                   <span className="clay-badge" style={{ width: '3.6rem', height: '3.6rem' }}>
                     <PrayerGlyph prayer={key} width={20} height={20} />
                   </span>
-                  <span className="offset__name">{PRAYER_LABELS[key].name}</span>
+                  <span className="offset__name">{labels[key].name}</span>
                   <div className="stepper">
-                    <button type="button" onClick={() => setOffset(key, -1)} aria-label={`Decrease ${PRAYER_LABELS[key].name} offset`}>
+                    <button
+                      type="button"
+                      onClick={() => setOffset(key, -1)}
+                      aria-label={t.decreaseOffset(labels[key].name)}
+                    >
                       −
                     </button>
                     <span className="stepper__value">
                       {settings.offsets[key] > 0 ? '+' : ''}
-                      {settings.offsets[key]} min
+                      {settings.offsets[key]} {t.minAbbrev}
                     </span>
-                    <button type="button" onClick={() => setOffset(key, 1)} aria-label={`Increase ${PRAYER_LABELS[key].name} offset`}>
+                    <button
+                      type="button"
+                      onClick={() => setOffset(key, 1)}
+                      aria-label={t.increaseOffset(labels[key].name)}
+                    >
                       +
                     </button>
                   </div>
@@ -272,30 +298,24 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
           </div>
 
           <div className="field">
-            <span className="field__label">Announcements</span>
-            <p className="field__hint">
-              A call tone plays on this device when a prayer time arrives. Shift-click a speaker on
-              any prayer row to hear it now.
-            </p>
+            <span className="field__label">{t.announcements}</span>
+            <p className="field__hint">{t.announcementsHint}</p>
             <Switch
-              label="Desktop notifications"
-              hint="Shows a system notification alongside the tone."
+              label={t.desktopNotifications}
+              hint={t.desktopNotificationsHint}
               checked={settings.notificationsEnabled}
               onChange={requestNotifications}
             />
           </div>
 
           <div className="field">
-            <span className="field__label">Announced prayers</span>
-            <p className="field__hint">
-              The speaker on a prayer row shows when its call is on. These are the same
-              switches, in case a row is hard to reach on a wall display.
-            </p>
+            <span className="field__label">{t.announcedPrayers}</span>
+            <p className="field__hint">{t.announcedPrayersHint}</p>
             <div className="offsets">
               {PRAYABLE_KEYS.map((key) => (
                 <Switch
                   key={key}
-                  label={PRAYER_LABELS[key].name}
+                  label={labels[key].name}
                   checked={settings.adhanEnabled[key]}
                   onChange={(on) =>
                     onChange({ adhanEnabled: { ...settings.adhanEnabled, [key]: on } })
@@ -306,37 +326,21 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
           </div>
 
           <div className="field">
-            <span className="field__label">Appearance</span>
-            <p className="field__hint">
-              On “Follow the sun” the interface turns dark at Maghrib and light again at
-              sunrise. The toggle beside the gear pins it either way.
-            </p>
-            <div className="segmented">
-              {(['auto', 'light', 'dark'] as const).map((theme) => (
-                <button
-                  key={theme}
-                  type="button"
-                  aria-pressed={settings.theme === theme}
-                  onClick={() => onChange({ theme })}
-                >
-                  {theme === 'auto' ? 'Follow the sun' : theme === 'light' ? 'Light' : 'Dark'}
-                </button>
-              ))}
-            </div>
+            <span className="field__label">{t.display}</span>
             <Switch
-              label="24-hour clock"
+              label={t.clock24h}
               checked={settings.clock24h}
               onChange={(clock24h) => onChange({ clock24h })}
             />
             <Switch
-              label="Show weather"
-              hint="Also drives the rain, snow and cloud effects in the scene."
+              label={t.showWeather}
+              hint={t.showWeatherHint}
               checked={settings.showWeather}
               onChange={(showWeather) => onChange({ showWeather })}
             />
             <Switch
-              label="Reduce motion"
-              hint="Stops the drifting clouds and the spinning sun."
+              label={t.reduceMotion}
+              hint={t.reduceMotionHint}
               checked={settings.reducedMotion}
               onChange={(reducedMotion) => onChange({ reducedMotion })}
             />
@@ -345,12 +349,12 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
 
         <div className="drawer__footer">
           <span>
-            Times: {source}
-            {calendar ? ` · ${calendar.days.length} days cached` : ''}
+            {source}
+            {calendar ? ` · ${t.daysCached(calendar.days.length)}` : ''}
             {calendar?.sourceNote ? ` · ${calendar.sourceNote}` : ''}
           </span>
           <button type="button" className="button-ghost" onClick={onReset}>
-            Reset all
+            {t.resetAll}
           </button>
         </div>
       </aside>

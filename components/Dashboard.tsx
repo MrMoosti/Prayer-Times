@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import AnnouncementOverlay from './AnnouncementOverlay';
 import CountdownCard from './CountdownCard';
 import Header from './Header';
@@ -8,7 +8,8 @@ import PrayerTimesCard from './PrayerTimesCard';
 import SceneBackground from './scene/SceneBackground';
 import SettingsPanel from './SettingsPanel';
 import VerseCard from './VerseCard';
-import { playChime, unlockAudio } from '@/lib/adhan';
+import { unlockAudio } from '@/lib/adhan';
+import { strings } from '@/lib/i18n';
 import { buildSchedule, type Schedule } from '@/lib/prayer';
 import { isoDateIn } from '@/lib/time';
 import type { PrayerKey, Settings } from '@/lib/types';
@@ -43,9 +44,7 @@ function BootShell() {
  * prayer times rather than to the sun's altitude: Maghrib is the moment the
  * day is over for the people reading this screen.
  */
-function isDarkNow(schedule: Schedule | null, settings: Settings, now: number): boolean {
-  if (settings.theme === 'light') return false;
-  if (settings.theme === 'dark') return true;
+function isDarkNow(schedule: Schedule | null, now: number): boolean {
   if (!schedule) return false;
 
   const at = (key: PrayerKey) => schedule.entries.find((e) => e.key === key)?.at;
@@ -62,55 +61,38 @@ export default function Dashboard() {
   const minuteNow = useNow(60_000);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [audioArmed, setAudioArmed] = useState(false);
+  const openSettings = useCallback(() => setSettingsOpen(true), []);
+  const closeSettings = useCallback(() => setSettingsOpen(false), []);
 
   const { calendar, loading, error } = useCalendar(settings, ready);
   const weather = useWeather(settings, ready);
+  const t = strings(settings.language);
 
   const schedule = useMemo(
     () => (calendar ? buildSchedule(calendar, settings, now) : null),
     [calendar, settings, now],
   );
 
-  const dark = useMemo(() => isDarkNow(schedule, settings, now), [schedule, settings, now]);
+  const dark = useMemo(() => isDarkNow(schedule, now), [schedule, now]);
 
-  const { announcement, dismiss, announce } = useAnnouncer(schedule, settings, now);
+  const { announcement, dismiss } = useAnnouncer(schedule, settings, now);
 
-  const armAudio = useCallback(async () => {
-    const ok = await unlockAudio();
-    setAudioArmed(ok);
-    if (ok) {
-      // Play a short confirmation so it is obvious the sound works.
-      playChime('dhuhr', 0.32);
-      if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-        const permission = await Notification.requestPermission();
-        update({ notificationsEnabled: permission === 'granted' });
-      }
-    }
-  }, [update]);
-
-  const toggleAdhan = useCallback(
-    (key: PrayerKey) => {
-      update({
-        adhanEnabled: { ...settings.adhanEnabled, [key]: !settings.adhanEnabled[key] },
-      });
-    },
-    [settings.adhanEnabled, update],
-  );
-
-  const previewAdhan = useCallback(
-    async (key: PrayerKey) => {
-      await unlockAudio();
-      setAudioArmed(true);
-      announce(key);
-    },
-    [announce],
-  );
-
-  // Tapping the toggle pins the opposite mode; 'auto' is restored in settings.
-  const toggleTheme = useCallback(() => {
-    update({ theme: dark ? 'light' : 'dark' });
-  }, [dark, update]);
+  // The sound-arming buttons are gone, so unlock the audio context on the first
+  // interaction of any kind — enough of a user gesture for the announcement
+  // tone to play later without another prompt.
+  useEffect(() => {
+    const arm = () => {
+      void unlockAudio();
+      window.removeEventListener('pointerdown', arm);
+      window.removeEventListener('keydown', arm);
+    };
+    window.addEventListener('pointerdown', arm);
+    window.addEventListener('keydown', arm);
+    return () => {
+      window.removeEventListener('pointerdown', arm);
+      window.removeEventListener('keydown', arm);
+    };
+  }, []);
 
   const isoDate = isoDateIn(now || Date.now(), settings.location.timezone);
 
@@ -133,35 +115,27 @@ export default function Dashboard() {
           weather={weather}
           now={now}
           dark={dark}
-          onToggleTheme={toggleTheme}
-          onOpenSettings={() => setSettingsOpen(true)}
+          onOpenSettings={openSettings}
         />
 
         <main className="app__main">
-          <CountdownCard
-            schedule={schedule}
-            now={now}
-            audioArmed={audioArmed}
-            onArmAudio={armAudio}
-          />
+          <CountdownCard schedule={schedule} settings={settings} now={now} />
           <div className="app__column">
             <PrayerTimesCard
               schedule={schedule}
               settings={settings}
               loading={loading || !ready}
-              onToggleAdhan={toggleAdhan}
-              onPreviewAdhan={previewAdhan}
             />
-            <VerseCard isoDate={isoDate} />
+            <VerseCard isoDate={isoDate} settings={settings} />
           </div>
         </main>
 
-        {error && <p className="notice">Prayer times unavailable: {error}</p>}
+        {error && <p className="notice">{t.prayerTimesUnavailable(error)}</p>}
         {!error && calendar?.source === 'calculated' && (
           <p className="notice">
             {settings.diyanet
-              ? `Diyanet unavailable — times calculated locally for ${settings.diyanet.cityName}.`
-              : `Offline — times calculated locally for ${settings.location.name}.`}
+              ? t.diyanetUnavailable(settings.diyanet.cityName)
+              : t.offlineCalculated(settings.location.name)}
           </p>
         )}
       </div>
@@ -172,7 +146,7 @@ export default function Dashboard() {
           calendar={calendar}
           onChange={update}
           onReset={reset}
-          onClose={() => setSettingsOpen(false)}
+          onClose={closeSettings}
         />
       )}
 
