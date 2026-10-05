@@ -10,30 +10,9 @@ const zeroOffsets = () =>
 const defaultAdhan = () =>
   Object.fromEntries(PRAYER_KEYS.map((k) => [k, k !== 'sunrise'])) as Record<PrayerKey, boolean>;
 
-export const CALCULATION_METHODS: Array<{ id: number; label: string }> = [
-  { id: 13, label: 'Diyanet İşleri Başkanlığı (Türkiye)' },
-  { id: 3, label: 'Muslim World League' },
-  { id: 2, label: 'ISNA (North America)' },
-  { id: 4, label: 'Umm al-Qura (Makkah)' },
-  { id: 5, label: 'Egyptian General Authority' },
-  { id: 1, label: 'University of Islamic Sciences, Karachi' },
-  { id: 12, label: 'Union des Organisations Islamiques de France' },
-  { id: 15, label: 'Moonsighting Committee Worldwide' },
-];
-
-export const HIGH_LATITUDE_LABELS: Record<Settings['highLatitudeRule'], string> = {
-  none: 'None (astronomical only)',
-  middleOfNight: 'Middle of the night',
-  oneSeventh: 'One seventh of the night',
-  angleBased: 'Angle based',
-};
-
 export const DEFAULT_SETTINGS: Settings = {
   location: DEFAULT_LOCATION,
   language: 'tr',
-  diyanet: null,
-  method: 13,
-  highLatitudeRule: 'oneSeventh',
   offsets: zeroOffsets(),
   adhanEnabled: defaultAdhan(),
   notificationsEnabled: false,
@@ -52,9 +31,6 @@ export function normalizeSettings(input: unknown): Settings {
     Math.abs(location.latitude) <= 90 &&
     Math.abs(location.longitude) <= 180;
 
-  const diyanet =
-    stored.diyanet && Number.isFinite(stored.diyanet.cityId) ? stored.diyanet : null;
-
   const language: Language = LANGUAGES.includes(stored.language as Language)
     ? (stored.language as Language)
     : DEFAULT_SETTINGS.language;
@@ -64,7 +40,6 @@ export function normalizeSettings(input: unknown): Settings {
     ...stored,
     location: valid ? location : DEFAULT_SETTINGS.location,
     language,
-    diyanet,
     offsets: { ...zeroOffsets(), ...(stored.offsets ?? {}) },
     adhanEnabled: { ...defaultAdhan(), ...(stored.adhanEnabled ?? {}) },
   };

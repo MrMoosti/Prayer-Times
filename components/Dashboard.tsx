@@ -9,9 +9,7 @@ import SceneBackground from './scene/SceneBackground';
 import SettingsPanel from './SettingsPanel';
 import VerseCard from './VerseCard';
 import { unlockAudio } from '@/lib/adhan';
-import { strings } from '@/lib/i18n';
 import { buildSchedule, type Schedule } from '@/lib/prayer';
-import { isoDateIn } from '@/lib/time';
 import type { PrayerKey, Settings } from '@/lib/types';
 import { useAnnouncer } from '@/lib/useAnnouncer';
 import { useNow } from '@/lib/useNow';
@@ -64,12 +62,11 @@ export default function Dashboard() {
   const openSettings = useCallback(() => setSettingsOpen(true), []);
   const closeSettings = useCallback(() => setSettingsOpen(false), []);
 
-  const { calendar, loading, error } = useCalendar(settings, ready);
+  const calendar = useCalendar(settings);
   const weather = useWeather(settings, ready);
-  const t = strings(settings.language);
 
   const schedule = useMemo(
-    () => (calendar ? buildSchedule(calendar, settings, now) : null),
+    () => buildSchedule(calendar, settings, now),
     [calendar, settings, now],
   );
 
@@ -93,8 +90,6 @@ export default function Dashboard() {
       window.removeEventListener('keydown', arm);
     };
   }, []);
-
-  const isoDate = isoDateIn(now || Date.now(), settings.location.timezone);
 
   // Nothing time-dependent may reach the server-rendered HTML, so the first
   // paint is a static shell and the live dashboard replaces it on mount.
@@ -124,26 +119,16 @@ export default function Dashboard() {
             <PrayerTimesCard
               schedule={schedule}
               settings={settings}
-              loading={loading || !ready}
+              loading={!ready}
             />
-            <VerseCard isoDate={isoDate} settings={settings} />
+            <VerseCard settings={settings} />
           </div>
         </main>
-
-        {error && <p className="notice">{t.prayerTimesUnavailable(error)}</p>}
-        {!error && calendar?.source === 'calculated' && (
-          <p className="notice">
-            {settings.diyanet
-              ? t.diyanetUnavailable(settings.diyanet.cityName)
-              : t.offlineCalculated(settings.location.name)}
-          </p>
-        )}
       </div>
 
       {settingsOpen && (
         <SettingsPanel
           settings={settings}
-          calendar={calendar}
           onChange={update}
           onReset={reset}
           onClose={closeSettings}

@@ -1,10 +1,10 @@
 import { BookIcon } from './icons';
 import { strings } from '@/lib/i18n';
 import type { Settings } from '@/lib/types';
-import { verseOfTheDay } from '@/lib/verses';
+import { DUMMY_VERSE } from '@/lib/verses';
 
-export default function VerseCard({ isoDate, settings }: { isoDate: string; settings: Settings }) {
-  const verse = verseOfTheDay(isoDate);
+export default function VerseCard({ settings }: { settings: Settings }) {
+  const verse = DUMMY_VERSE;
   const t = strings(settings.language);
   return (
     <section className="clay clay-deep verse">

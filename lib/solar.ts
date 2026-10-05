@@ -1,16 +1,11 @@
 /**
  * Astronomical helpers.
  *
- * Used for two things:
- *  1. Placing the sun and the moon on the clay sky (real altitude / azimuth for
- *     the configured location, so the celestial body actually tracks the day).
- *  2. Calculating prayer times offline, as a fallback when the Aladhan API is
- *     unreachable. Angles match the Diyanet convention (Fajr 18deg, Isha 17deg,
- *     Asr shadow factor 1).
+ * Places the sun and the moon on the clay sky (real altitude / azimuth for
+ * the configured location, so the celestial body actually tracks the day).
  *
  * Formulas follow the standard low-precision solar/lunar approximations
- * (Meeus, as popularised by suncalc); accurate to well under a minute for
- * prayer-time purposes.
+ * (Meeus, as popularised by suncalc).
  */
 
 const RAD = Math.PI / 180;
@@ -21,7 +16,6 @@ const J2000 = 2451545;
 const E = 23.4397 * RAD;
 
 const toJulian = (date: Date) => date.valueOf() / DAY_MS - 0.5 + J1970;
-const fromJulian = (j: number) => new Date((j + 0.5 - J1970) * DAY_MS);
 /** Days since the J2000.0 epoch. */
 const toDays = (date: Date) => toJulian(date) - J2000;
 
@@ -114,131 +108,4 @@ export function moonPosition(date: Date, lat: number, lng: number): MoonState {
     fraction: (1 + Math.cos(inc)) / 2,
     phase: 0.5 + (0.5 * inc * (angle < 0 ? -1 : 1)) / Math.PI,
   };
-}
-
-/* ------------------------------------------------------------------ *
- * Offline prayer-time calculation
- * ------------------------------------------------------------------ */
-
-const julianCycle = (d: number, lw: number) => Math.round(d - 0.0009 - lw / (2 * Math.PI));
-const approxTransit = (Ht: number, lw: number, n: number) =>
-  0.0009 + (Ht + lw) / (2 * Math.PI) + n;
-const solarTransitJ = (ds: number, M: number, L: number) =>
-  J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
-
-/** Hour angle at which the sun sits at altitude `h` (radians). */
-const hourAngle = (h: number, phi: number, dec: number) => {
-  const cosH =
-    (Math.sin(h) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec));
-  if (cosH > 1 || cosH < -1) return NaN; // sun never reaches this altitude today
-  return Math.acos(cosH);
-};
-
-export interface SolarAngles {
-  fajr: number;
-  isha: number;
-  /** Asr shadow multiplier: 1 = Diyanet/Shafi, 2 = Hanafi. */
-  asrFactor: number;
-}
-
-export const DIYANET_ANGLES: SolarAngles = { fajr: 18, isha: 17, asrFactor: 1 };
-
-/**
- * Above roughly 48deg latitude the sun never dips 17-18deg below the horizon in
- * midsummer, so Fajr and Isha have no astronomical solution. These are the
- * conventional substitutes; the names match Aladhan's
- * `latitudeAdjustmentMethod` so the API and the offline path agree.
- */
-export type HighLatitudeRule = 'none' | 'middleOfNight' | 'oneSeventh' | 'angleBased';
-
-export const ALADHAN_LATITUDE_METHOD: Record<HighLatitudeRule, number | null> = {
-  none: null,
-  middleOfNight: 1,
-  oneSeventh: 2,
-  angleBased: 3,
-};
-
-/**
- * Calculates the six times for a local calendar date. Returns `null` for any
- * event the sun does not reach at this latitude (high-latitude summer), so the
- * caller can fall back to the API or hide the row.
- */
-export function calculatePrayerTimes(
-  date: Date,
-  lat: number,
-  lng: number,
-  angles: SolarAngles = DIYANET_ANGLES,
-  highLatitudeRule: HighLatitudeRule = 'oneSeventh',
-): Record<string, Date | null> {
-  const lw = RAD * -lng;
-  const phi = RAD * lat;
-  // Anchor on local noon so the returned instants land on the requested day.
-  const noon = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0, 0);
-  const d = toDays(noon);
-  const n = julianCycle(d, lw);
-  const ds = approxTransit(0, lw, n);
-  const M = solarMeanAnomaly(ds);
-  const L = eclipticLongitude(M);
-  const dec = declination(L, 0);
-  const Jnoon = solarTransitJ(ds, M, L);
-
-  const at = (h: number, side: -1 | 1) => {
-    const w = hourAngle(h, phi, dec);
-    if (Number.isNaN(w)) return null;
-    const a = approxTransit(side * w, lw, n);
-    return fromJulian(solarTransitJ(a, M, L));
-  };
-
-  // Asr: shadow of an object equals its own length times the factor, plus the
-  // shadow already present at solar noon.
-  const asrAltitude = Math.atan(1 / (angles.asrFactor + Math.tan(Math.abs(phi - dec))));
-
-  const times = {
-    fajr: at(-angles.fajr * RAD, -1),
-    sunrise: at(-0.833 * RAD, -1),
-    dhuhr: fromJulian(Jnoon),
-    asr: at(asrAltitude, 1),
-    maghrib: at(-0.833 * RAD, 1),
-    isha: at(-angles.isha * RAD, 1),
-  };
-
-  // High-latitude adjustment. Two cases need catching, not one: the sun never
-  // reaching the angle at all (no astronomical time), and reaching it so close
-  // to solar midnight that the twilight never really ended - at 52N in late May
-  // the astronomical Isha falls at 01:29, twelve minutes before the sun's
-  // lowest point. Both are replaced by a fixed portion of the night.
-  //
-  // The trigger has to be narrow: a blanket "clamp anything past the portion"
-  // also rewrites correct times at mid latitudes (it moves Istanbul's Fajr 40
-  // minutes late). So a time only counts as pathological when it falls within
-  // an eighth of the night of solar midnight.
-  if (highLatitudeRule !== 'none' && times.sunrise && times.maghrib) {
-    // Night runs from tonight's sunset to tomorrow's sunrise; today's sunrise
-    // plus 24h is within a couple of minutes of it and avoids recursing.
-    const night = times.sunrise.valueOf() + DAY_MS - times.maghrib.valueOf();
-    const solarMidnight = Jnoon !== null ? fromJulian(Jnoon).valueOf() + DAY_MS / 2 : 0;
-    const margin = night / 8;
-
-    const portion = (angleDeg: number) => {
-      switch (highLatitudeRule) {
-        case 'middleOfNight':
-          return night / 2;
-        case 'angleBased':
-          return (night * angleDeg) / 60;
-        default:
-          return night / 7;
-      }
-    };
-
-    // Isha belongs to the evening: it must land clear of solar midnight.
-    if (!times.isha || times.isha.valueOf() > solarMidnight - margin) {
-      times.isha = new Date(times.maghrib.valueOf() + portion(angles.isha));
-    }
-    // Fajr belongs to the morning, so it is judged against the same midnight.
-    if (!times.fajr || times.fajr.valueOf() < solarMidnight - DAY_MS + margin) {
-      times.fajr = new Date(times.sunrise.valueOf() - portion(angles.fajr));
-    }
-  }
-
-  return times;
 }

@@ -1,23 +1,17 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import DiyanetPicker from './DiyanetPicker';
+import { useEffect, useRef } from 'react';
 import { CloseIcon, PrayerGlyph } from './icons';
 import { LANGUAGES, LANGUAGE_LABELS, prayerLabels, strings, type Language } from '@/lib/i18n';
-import { CALCULATION_METHODS, HIGH_LATITUDE_LABELS } from '@/lib/settings';
 import {
   PRAYABLE_KEYS,
   PRAYER_KEYS,
-  type LocationSetting,
   type PrayerKey,
   type Settings,
-  type YearlyCalendar,
 } from '@/lib/types';
-import type { HighLatitudeRule } from '@/lib/solar';
 
 interface Props {
   settings: Settings;
-  calendar: YearlyCalendar | null;
   onChange: (patch: Partial<Settings>) => void;
   onReset: () => void;
   onClose: () => void;
@@ -47,11 +41,7 @@ function Switch({
   );
 }
 
-export default function SettingsPanel({ settings, calendar, onChange, onReset, onClose }: Props) {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<LocationSetting[]>([]);
-  const [searching, setSearching] = useState(false);
-  const [locating, setLocating] = useState(false);
+export default function SettingsPanel({ settings, onChange, onReset, onClose }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   const t = strings(settings.language);
@@ -71,49 +61,6 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  // Debounced city lookup; falls back to the bundled list when offline.
-  useEffect(() => {
-    let cancelled = false;
-    setSearching(true);
-    const timer = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
-        const body = (await res.json()) as { results: LocationSetting[] };
-        if (!cancelled) setResults(body.results ?? []);
-      } catch {
-        if (!cancelled) setResults([]);
-      } finally {
-        if (!cancelled) setSearching(false);
-      }
-    }, 320);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [query]);
-
-  const useMyLocation = () => {
-    if (!navigator.geolocation) return;
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-        onChange({
-          location: {
-            name: 'My location',
-            country: `${coords.latitude.toFixed(3)}, ${coords.longitude.toFixed(3)}`,
-            latitude: Number(coords.latitude.toFixed(4)),
-            longitude: Number(coords.longitude.toFixed(4)),
-            timezone,
-          },
-        });
-        setLocating(false);
-      },
-      () => setLocating(false),
-      { timeout: 10_000 },
-    );
-  };
-
   const setOffset = (key: PrayerKey, delta: number) => {
     const next = Math.max(-60, Math.min(60, (settings.offsets[key] ?? 0) + delta));
     onChange({ offsets: { ...settings.offsets, [key]: next } });
@@ -129,14 +76,6 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
       Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
     onChange({ notificationsEnabled: permission === 'granted' });
   };
-
-  const source = !calendar
-    ? t.timesSourceLoading
-    : calendar.source === 'diyanet'
-      ? `Diyanet · ${calendar.officialDays ?? 0} official days, rest calculated`
-      : calendar.source === 'aladhan'
-        ? `Aladhan · method ${calendar.method}`
-        : 'Calculated locally (API unreachable)';
 
   return (
     <>
@@ -173,93 +112,6 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
                 </button>
               ))}
             </div>
-          </div>
-
-          <div className="field">
-            <label className="field__label" htmlFor="city">
-              {t.location}
-            </label>
-            <p className="field__hint">
-              {t.locationCurrently(
-                `${settings.location.name}${
-                  settings.location.country ? `, ${settings.location.country}` : ''
-                }`,
-                settings.location.timezone,
-              )}
-            </p>
-            <input
-              id="city"
-              className="input"
-              placeholder={t.searchCity}
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              autoComplete="off"
-            />
-            <div className="results">
-              {results.map((city) => {
-                const selected =
-                  city.latitude === settings.location.latitude &&
-                  city.longitude === settings.location.longitude;
-                return (
-                  <button
-                    key={`${city.name}-${city.latitude}-${city.longitude}`}
-                    type="button"
-                    className="results__item"
-                    data-selected={selected}
-                    onClick={() => onChange({ location: city })}
-                  >
-                    <span>{city.name}</span>
-                    <span className="results__country">{city.country}</span>
-                  </button>
-                );
-              })}
-              {!results.length && !searching && <p className="field__hint">{t.noCitiesMatched}</p>}
-            </div>
-            <button type="button" className="button-ghost" onClick={useMyLocation} disabled={locating}>
-              {locating ? t.locating : t.useMyLocation}
-            </button>
-          </div>
-
-          <DiyanetPicker settings={settings} onChange={onChange} />
-
-          <div className="field">
-            <label className="field__label" htmlFor="method">
-              {t.calculationMethod}
-            </label>
-            <p className="field__hint">{t.calculationMethodHint}</p>
-            <select
-              id="method"
-              className="select"
-              value={settings.method}
-              onChange={(event) => onChange({ method: Number(event.target.value) })}
-            >
-              {CALCULATION_METHODS.map((method) => (
-                <option key={method.id} value={method.id}>
-                  {method.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="field">
-            <label className="field__label" htmlFor="highlat">
-              {t.highLatitudeRule}
-            </label>
-            <p className="field__hint">{t.highLatitudeRuleHint}</p>
-            <select
-              id="highlat"
-              className="select"
-              value={settings.highLatitudeRule}
-              onChange={(event) =>
-                onChange({ highLatitudeRule: event.target.value as HighLatitudeRule })
-              }
-            >
-              {Object.entries(HIGH_LATITUDE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div className="field">
@@ -348,11 +200,6 @@ export default function SettingsPanel({ settings, calendar, onChange, onReset, o
         </div>
 
         <div className="drawer__footer">
-          <span>
-            {source}
-            {calendar ? ` · ${t.daysCached(calendar.days.length)}` : ''}
-            {calendar?.sourceNote ? ` · ${calendar.sourceNote}` : ''}
-          </span>
           <button type="button" className="button-ghost" onClick={onReset}>
             {t.resetAll}
           </button>

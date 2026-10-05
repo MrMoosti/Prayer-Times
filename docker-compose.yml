@@ -1,17 +1,8 @@
 # Mektep Prayer — deploy via Coolify (or plain `docker compose up -d`).
 #
-# In Coolify: New Resource → Docker Compose, point it at this repository, then
-# set DIYANET_EMAIL and DIYANET_PASSWORD in the resource's Environment
-# Variables tab. Coolify substitutes SERVICE_FQDN_MEKTEP_3000 with the domain
-# it assigns and routes its proxy to port 3000, so no host port is published
-# here.
-#
-# The named volume is not optional if you use Diyanet: it holds the cached
-# months, the auth token and the daily quota counter. Without it every restart
-# spends part of an allowance of five requests per endpoint per day.
-#
-# Run ONE replica. The quota counter is per process, so two instances sharing
-# an account would each think they had the full allowance and spend it twice.
+# In Coolify: New Resource → Docker Compose, point it at this repository.
+# Coolify substitutes SERVICE_FQDN_MEKTEP_3000 with the domain it assigns and
+# routes its proxy to port 3000, so no host port is published here.
 
 services:
   mektep-prayer:
@@ -25,18 +16,9 @@ services:
       - SERVICE_FQDN_MEKTEP_3000
       - NODE_ENV=production
       - PORT=3000
-      # Set these in Coolify's Environment Variables tab, or in a local .env.
-      - DIYANET_EMAIL=${DIYANET_EMAIL:-}
-      - DIYANET_PASSWORD=${DIYANET_PASSWORD:-}
-      - DIYANET_DAILY_BUDGET=${DIYANET_DAILY_BUDGET:-4}
-      - DIYANET_BASE_URL=${DIYANET_BASE_URL:-https://awqatsalah.diyanet.gov.tr}
-      - ALADHAN_BASE_URL=${ALADHAN_BASE_URL:-https://api.aladhan.com/v1}
       - OPEN_METEO_BASE_URL=${OPEN_METEO_BASE_URL:-https://api.open-meteo.com/v1}
-      - OPEN_METEO_GEOCODING_URL=${OPEN_METEO_GEOCODING_URL:-https://geocoding-api.open-meteo.com/v1}
     expose:
       - '3000'
-    volumes:
-      - prayer-cache:/app/.cache
     healthcheck:
       test:
         - CMD
@@ -47,6 +29,3 @@ services:
       timeout: 5s
       start_period: 20s
       retries: 3
-
-volumes:
-  prayer-cache:

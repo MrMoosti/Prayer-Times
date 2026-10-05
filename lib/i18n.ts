@@ -90,25 +90,12 @@ export interface Strings {
   hasBegun: (name: string) => string;
   dismiss: string;
   feelsLike: (deg: number) => string;
-  prayerTimesUnavailable: (reason: string) => string;
-  offlineCalculated: (place: string) => string;
-  diyanetUnavailable: (place: string) => string;
 
   // settings drawer
   settings: string;
   closeSettings: string;
   language: string;
   languageHint: string;
-  location: string;
-  locationCurrently: (place: string, tz: string) => string;
-  searchCity: string;
-  noCitiesMatched: string;
-  useMyLocation: string;
-  locating: string;
-  calculationMethod: string;
-  calculationMethodHint: string;
-  highLatitudeRule: string;
-  highLatitudeRuleHint: string;
   timeOffsets: string;
   timeOffsetsHint: string;
   decreaseOffset: (name: string) => string;
@@ -127,8 +114,6 @@ export interface Strings {
   reduceMotion: string;
   reduceMotionHint: string;
   resetAll: string;
-  timesSourceLoading: string;
-  daysCached: (n: number) => string;
 }
 
 export const STRINGS: Record<Language, Strings> = {
@@ -145,25 +130,10 @@ export const STRINGS: Record<Language, Strings> = {
     hasBegun: (name) => `${name} has begun`,
     dismiss: 'Dismiss',
     feelsLike: (deg) => `feels like ${deg}°`,
-    prayerTimesUnavailable: (reason) => `Prayer times unavailable: ${reason}`,
-    offlineCalculated: (place) => `Offline — times calculated locally for ${place}.`,
-    diyanetUnavailable: (place) => `Diyanet unavailable — times calculated locally for ${place}.`,
     settings: 'Settings',
     closeSettings: 'Close settings',
     language: 'Language',
     languageHint: 'The language of the interface and the prayer names.',
-    location: 'Location',
-    locationCurrently: (place, tz) => `Currently ${place} (${tz}).`,
-    searchCity: 'Search for a city…',
-    noCitiesMatched: 'No cities matched.',
-    useMyLocation: 'Use my current location',
-    locating: 'Locating…',
-    calculationMethod: 'Calculation method',
-    calculationMethodHint:
-      'Used by Aladhan and by the local calculation. Ignored while a Diyanet place is selected.',
-    highLatitudeRule: 'High latitude rule',
-    highLatitudeRuleHint:
-      'Above about 48° the sun never dips far enough below the horizon in summer for Fajr and Isha to have an astronomical time. This decides what is shown instead.',
     timeOffsets: 'Time offsets',
     timeOffsetsHint:
       'Minutes added to each time. This shifts the displayed time and delays the announcement with it.',
@@ -183,8 +153,6 @@ export const STRINGS: Record<Language, Strings> = {
     reduceMotion: 'Reduce motion',
     reduceMotionHint: 'Stops the drifting clouds and the spinning sun.',
     resetAll: 'Reset all',
-    timesSourceLoading: 'Loading',
-    daysCached: (n) => `${n} days cached`,
   },
   nl: {
     today: 'Vandaag',
@@ -199,26 +167,10 @@ export const STRINGS: Record<Language, Strings> = {
     hasBegun: (name) => `${name} is begonnen`,
     dismiss: 'Sluiten',
     feelsLike: (deg) => `voelt als ${deg}°`,
-    prayerTimesUnavailable: (reason) => `Gebedstijden niet beschikbaar: ${reason}`,
-    offlineCalculated: (place) => `Offline — tijden lokaal berekend voor ${place}.`,
-    diyanetUnavailable: (place) =>
-      `Diyanet niet beschikbaar — tijden lokaal berekend voor ${place}.`,
     settings: 'Instellingen',
     closeSettings: 'Instellingen sluiten',
     language: 'Taal',
     languageHint: 'De taal van de interface en de gebedsnamen.',
-    location: 'Locatie',
-    locationCurrently: (place, tz) => `Momenteel ${place} (${tz}).`,
-    searchCity: 'Zoek een stad…',
-    noCitiesMatched: 'Geen steden gevonden.',
-    useMyLocation: 'Gebruik mijn huidige locatie',
-    locating: 'Locatie bepalen…',
-    calculationMethod: 'Berekeningsmethode',
-    calculationMethodHint:
-      'Gebruikt door Aladhan en de lokale berekening. Genegeerd zolang een Diyanet-plaats is gekozen.',
-    highLatitudeRule: 'Regel voor hoge breedtegraad',
-    highLatitudeRuleHint:
-      'Boven ongeveer 48° zakt de zon in de zomer niet ver genoeg onder de horizon om Fajr en Isha een astronomische tijd te geven. Dit bepaalt wat er in plaats daarvan wordt getoond.',
     timeOffsets: 'Tijdcorrecties',
     timeOffsetsHint:
       'Minuten toegevoegd aan elke tijd. Dit verschuift de getoonde tijd en stelt de aankondiging mee uit.',
@@ -238,8 +190,6 @@ export const STRINGS: Record<Language, Strings> = {
     reduceMotion: 'Beweging beperken',
     reduceMotionHint: 'Stopt de drijvende wolken en de draaiende zon.',
     resetAll: 'Alles herstellen',
-    timesSourceLoading: 'Laden',
-    daysCached: (n) => `${n} dagen in cache`,
   },
   tr: {
     today: 'Bugün',
@@ -254,26 +204,10 @@ export const STRINGS: Record<Language, Strings> = {
     hasBegun: (name) => `${name} vakti girdi`,
     dismiss: 'Kapat',
     feelsLike: (deg) => `hissedilen ${deg}°`,
-    prayerTimesUnavailable: (reason) => `Namaz vakitleri alınamadı: ${reason}`,
-    offlineCalculated: (place) => `Çevrimdışı — vakitler ${place} için yerel olarak hesaplandı.`,
-    diyanetUnavailable: (place) =>
-      `Diyanet erişilemedi — vakitler ${place} için yerel olarak hesaplandı.`,
     settings: 'Ayarlar',
     closeSettings: 'Ayarları kapat',
     language: 'Dil',
     languageHint: 'Arayüzün ve namaz isimlerinin dili.',
-    location: 'Konum',
-    locationCurrently: (place, tz) => `Şu an ${place} (${tz}).`,
-    searchCity: 'Bir şehir arayın…',
-    noCitiesMatched: 'Eşleşen şehir yok.',
-    useMyLocation: 'Mevcut konumumu kullan',
-    locating: 'Konum bulunuyor…',
-    calculationMethod: 'Hesaplama yöntemi',
-    calculationMethodHint:
-      'Aladhan ve yerel hesaplama tarafından kullanılır. Bir Diyanet yeri seçiliyken göz ardı edilir.',
-    highLatitudeRule: 'Yüksek enlem kuralı',
-    highLatitudeRuleHint:
-      'Yaklaşık 48° üzerinde yazın güneş, imsak ve yatsının astronomik bir vakti olacak kadar ufkun altına inmez. Bunun yerine ne gösterileceğini bu belirler.',
     timeOffsets: 'Vakit düzeltmeleri',
     timeOffsetsHint:
       'Her vakte eklenen dakika. Gösterilen vakti kaydırır ve duyuruyu da onunla birlikte geciktirir.',
@@ -293,8 +227,6 @@ export const STRINGS: Record<Language, Strings> = {
     reduceMotion: 'Hareketi azalt',
     reduceMotionHint: 'Süzülen bulutları ve dönen güneşi durdurur.',
     resetAll: 'Tümünü sıfırla',
-    timesSourceLoading: 'Yükleniyor',
-    daysCached: (n) => `${n} gün önbellekte`,
   },
 };
 

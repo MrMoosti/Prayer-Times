@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "scene": "node scripts/build-scene.mjs",
-    "typecheck": "tsc --noEmit",
-    "diyanet:check": "node --conditions=react-server scripts/diyanet-check.mjs"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",

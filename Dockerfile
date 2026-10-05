@@ -30,11 +30,6 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Prayer times, Diyanet tokens and the daily quota counter live here. Mount a
-# volume over it — see docker-compose.yml — or a restart re-spends the quota.
-RUN mkdir -p /app/.cache && chown -R nextjs:nodejs /app/.cache
-VOLUME ["/app/.cache"]
-
 USER nextjs
 EXPOSE 3000
 
