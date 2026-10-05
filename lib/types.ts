@@ -80,11 +80,3 @@ export interface WeatherNow {
   observedAt: number;
   source: 'open-meteo' | 'unavailable';
 }
-
-export interface KerahatWindow {
-  key: 'israk' | 'istiva' | 'isfirar';
-  label: string;
-  description: string;
-  start: number;
-  end: number;
-}

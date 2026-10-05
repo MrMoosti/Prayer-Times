@@ -9,7 +9,7 @@ import './scene.css';
 export const metadata: Metadata = {
   title: 'Prayer Times',
   description:
-    'Prayer times, kerahat windows and live weather on a clay landscape that follows the sun.',
+    'Prayer times and live weather on a clay landscape that follows the sun.',
 };
 
 export const viewport: Viewport = {

@@ -1,10 +1,7 @@
-import { PRAYER_KEYS, type DayTimes, type KerahatWindow, type PrayerKey, type Settings, type YearlyCalendar } from './types';
+import { PRAYER_KEYS, type DayTimes, type PrayerKey, type Settings, type YearlyCalendar } from './types';
 import { addDays, isoDateIn } from './time';
 
 const MINUTE = 60_000;
-
-/** Kerahat windows are conventionally 45 minutes wide either side of the event. */
-export const KERAHAT_MINUTES = 45;
 
 export interface ScheduleEntry {
   key: PrayerKey;
@@ -26,7 +23,6 @@ export interface Schedule {
   next: ScheduleEntry | null;
   /** Epoch ms of the next entry, which may fall on tomorrow's calendar day. */
   nextAt: number | null;
-  kerahat: KerahatWindow[];
 }
 
 function withOffsets(day: DayTimes, offsets: Record<PrayerKey, number>) {
@@ -120,44 +116,5 @@ export function buildSchedule(
     current,
     next,
     nextAt,
-    kerahat: buildKerahat(times),
   };
-}
-
-function buildKerahat(times: Partial<Record<PrayerKey, number>>): KerahatWindow[] {
-  const span = KERAHAT_MINUTES * MINUTE;
-  const windows: KerahatWindow[] = [];
-
-  if (times.sunrise != null) {
-    windows.push({
-      key: 'israk',
-      label: 'After sunrise',
-      description: 'From sunrise until the sun has fully risen (Israk).',
-      start: times.sunrise,
-      end: times.sunrise + span,
-    });
-  }
-  if (times.dhuhr != null) {
-    windows.push({
-      key: 'istiva',
-      label: 'Solar zenith',
-      description: 'While the sun stands at its highest point, until Dhuhr (Istiva).',
-      start: times.dhuhr - span,
-      end: times.dhuhr,
-    });
-  }
-  if (times.maghrib != null) {
-    windows.push({
-      key: 'isfirar',
-      label: 'Before sunset',
-      description: 'From when the sun yellows until it sets (Isfirar).',
-      start: times.maghrib - span,
-      end: times.maghrib,
-    });
-  }
-  return windows;
-}
-
-export function activeKerahat(windows: KerahatWindow[], now: number): KerahatWindow | null {
-  return windows.find((w) => now >= w.start && now < w.end) ?? null;
 }
