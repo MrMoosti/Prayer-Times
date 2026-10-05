@@ -6,7 +6,7 @@ import { prayerLabels } from './i18n';
 import type { PrayerKey, Settings } from './types';
 import type { Schedule } from './prayer';
 
-const LAST_KEY = 'mektep-prayer.lastAnnounced';
+const LAST_KEY = 'prayer-times.lastAnnounced';
 /** How late an announcement may still fire, e.g. after the tab was asleep. */
 const GRACE_MS = 90_000;
 const OVERLAY_MS = 20_000;

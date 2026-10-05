@@ -2,7 +2,7 @@ import { DEFAULT_LOCATION } from './cities';
 import { LANGUAGES, type Language } from './i18n';
 import { PRAYER_KEYS, type PrayerKey, type Settings } from './types';
 
-const STORAGE_KEY = 'mektep-prayer.settings.v1';
+const STORAGE_KEY = 'prayer-times.settings.v1';
 
 const zeroOffsets = () =>
   Object.fromEntries(PRAYER_KEYS.map((k) => [k, 0])) as Record<PrayerKey, number>;

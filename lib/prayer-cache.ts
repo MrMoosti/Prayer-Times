@@ -1,7 +1,7 @@
 import { addDays, zonedToEpoch } from './time';
 import { PRAYER_KEYS, type DayTimes, type PrayerKey, type YearlyCalendar } from './types';
 
-const STORAGE_KEY = 'mektep-prayer.times.v1';
+const STORAGE_KEY = 'prayer-times.times.v1';
 
 export const RANGE_DAYS = 365;
 export const TOP_UP_BELOW_DAYS = 30;

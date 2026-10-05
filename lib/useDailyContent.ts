@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { isoDateIn } from './time';
 import type { DailyContent, Settings } from './types';
 
-const STORAGE_KEY = 'mektep-prayer.daily-content.v1';
+const STORAGE_KEY = 'prayer-times.daily-content.v1';
 
 interface RawContent {
   date?: string;

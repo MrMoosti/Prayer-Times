@@ -7,7 +7,7 @@ import './globals.css';
 import './scene.css';
 
 export const metadata: Metadata = {
-  title: 'Mektep Prayer',
+  title: 'Prayer Times',
   description:
     'Prayer times, kerahat windows and live weather on a clay landscape that follows the sun.',
 };

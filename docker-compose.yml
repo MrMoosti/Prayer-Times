@@ -1,5 +1,5 @@
 services:
-  mektep-prayer:
+  prayer-times:
     build:
       context: .
       dockerfile: Dockerfile

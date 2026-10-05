@@ -1,4 +1,4 @@
-# Mektep Prayer
+# Prayer Times
 
 A 1920×1080 prayer-times display: today's times and a live countdown to the
 next prayer, over a claymorphic landscape that follows the real sun, moon and
