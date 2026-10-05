@@ -32,8 +32,6 @@ With Docker:
 docker compose -f docker-compose.standalone.yml up -d --build
 ```
 
-For **Coolify**, see [Deploying](#deploying).
-
 ```bash
 npm run build && npm start   # production
 npm run typecheck            # tsc --noEmit

@@ -10,5 +10,5 @@ assets
 npm-debug.log*
 *.tsbuildinfo
 Dockerfile
-docker-compose.yml
+docker-compose.standalone.yml
 README.md
