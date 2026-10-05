@@ -11,7 +11,7 @@ claymorphic landscape that follows the actual sun, moon and weather of your city
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
-![License](https://img.shields.io/badge/license-non--commercial-lightgrey)
+[![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-lightgrey)](LICENSE)
 
 ![Midday](docs/midday.webp)
 
@@ -357,5 +357,8 @@ scripts/              the artwork build
 
 ## License
 
-Free for open-source, personal and educational use. **Commercial use is not
-permitted.** See the license file for the exact terms.
+Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). You are free
+to use, modify and share it for open-source, personal, educational and other
+non-commercial purposes. **Commercial use is not permitted.**
+
+Copyright (c) 2026 MrMoosti.
