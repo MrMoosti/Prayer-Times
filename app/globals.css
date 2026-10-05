@@ -511,8 +511,9 @@ button {
 
 .verse {
   position: relative;
+  --verse-size: 2.3rem;
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 2.2rem;
   padding: 3rem 3.2rem;
   overflow: hidden;
@@ -523,10 +524,22 @@ button {
   width: 6.4rem;
   height: 6.4rem;
   flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .verse__body {
   min-width: 0;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-right: 10rem;
+}
+
+.verse__tabs,
+.verse__title,
+.verse__ref {
+  flex-shrink: 0;
 }
 
 .verse__tabs {
@@ -558,20 +571,18 @@ button {
 }
 
 .verse__text {
-  font-size: 2.3rem;
+  font-size: calc(var(--verse-size) * var(--verse-scale, 1));
   font-weight: 400;
   line-height: 1.42;
   margin: 0;
-  max-width: 30ch;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
+  flex: 1 1 0;
+  min-height: 0;
   overflow: hidden;
 }
 
 .verse__ref {
   color: var(--accent);
-  font-size: 1.9rem;
+  font-size: max(1.3rem, calc(1.9rem * var(--verse-scale, 1)));
   margin: 1.2rem 0 0;
 }
 
