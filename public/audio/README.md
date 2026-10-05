@@ -1,10 +1,9 @@
 # Adhan audio
 
-Empty by default: the app synthesises its call tone, so no audio ships with it.
+`adhan.mp3` ships with the app. To use a different recording, replace it or add
+files in this folder:
 
-To use a real recording, drop a file in this folder:
-
-- `adhan.mp3` — used for every prayer
+- `adhan.mp3` — used for every prayer (included)
 - `adhan-fajr.mp3` — used for Fajr only (same pattern for `dhuhr`, `asr`,
   `maghrib`, `isha`); a per-prayer file wins over `adhan.mp3`
 

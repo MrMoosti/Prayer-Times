@@ -120,10 +120,11 @@ plays. Browsers refuse to play audio before the page is interacted with, so the
 **Enable prayer notifications** button on the countdown card unlocks it — press
 it once when you set the display up.
 
-The tone is synthesised in `lib/adhan.ts` (struck-bell partials arranged in
-Hijaz), so no audio ships with the app. To use a real recording, drop
-`adhan.mp3` into `public/audio/` — or `adhan-fajr.mp3` for a per-prayer call.
-It is picked up on the next load with no configuration.
+A recording, `public/audio/adhan.mp3`, ships with the app and is used for every
+prayer. To change it, replace that file — or add `adhan-fajr.mp3` for a
+per-prayer call. It is picked up on the next load with no configuration. When no
+recording is present, a tone synthesised in `lib/adhan.ts` (struck-bell partials
+arranged in Hijaz) plays instead.
 
 ## The scene
 
