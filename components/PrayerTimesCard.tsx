@@ -15,6 +15,7 @@ interface Props {
 export default function PrayerTimesCard({ schedule, settings, loading }: Props) {
   const t = strings(settings.language);
   const labels = prayerLabels(settings.language);
+  const activeKey = schedule?.entries.filter((e) => e.passed).at(-1)?.key;
 
   return (
     <section className="clay card">
@@ -32,7 +33,7 @@ export default function PrayerTimesCard({ schedule, settings, loading }: Props) 
               <div
                 key={entry.key}
                 className="row"
-                data-current={entry.next}
+                data-current={entry.key === activeKey}
                 data-passed={entry.passed}
               >
                 <span className="clay-badge row__icon">
