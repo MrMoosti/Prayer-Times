@@ -1,16 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { dummyCalendar } from './dummy-times';
-import { isoDateIn } from './time';
-import type { Settings, WeatherNow, YearlyCalendar } from './types';
-
-export function useCalendar(settings: Settings): YearlyCalendar {
-  const { timezone } = settings.location;
-  const today = isoDateIn(Date.now(), timezone);
-
-  return useMemo(() => dummyCalendar(Date.now(), timezone), [timezone, today]);
-}
+import { useEffect, useState } from 'react';
+import type { Settings, WeatherNow } from './types';
 
 const WEATHER_INTERVAL = 10 * 60_000;
 

@@ -23,8 +23,8 @@ npm install
 npm run dev          # http://localhost:3000
 ```
 
-That is the whole setup. No API keys, no accounts, no environment variables.
-Prayer times and the verse of the day are dummy data for now.
+Add a `DIYANET_API_KEY` (see below) and open the settings drawer to pick a city.
+Prayer times need a Diyanet API key; see below.
 
 With Docker:
 
@@ -49,13 +49,38 @@ clock.
 
 | What | Source | Notes |
 | --- | --- | --- |
-| Prayer times | `lib/dummy-times.ts` | Dummy data: the same fixed times every day. |
-| Verse of the day | `lib/verses.ts` | Dummy data. |
+| Prayer times | [Diyanet Prayer Times API](https://diyanetapi.mennova.nl/scalar) `/api/v1/prayer-times/{cityId}/range` | Needs an API key. |
+| Daily content | Same API, `/api/v1/daily-content` | Turkish verse, hadith and prayer; any of them can be missing. |
+| City search | Same API, `/api/v1/places/cities` and `/places/nearest` | Search by name or by GPS position. |
 | Weather | [Open-Meteo](https://open-meteo.com) `/v1/forecast` | Keyless. Current conditions, WMO code. |
 
-The Open-Meteo base URL can be overridden if you proxy it:
+Create a key with the scopes `places:read`, `prayer-times:read` and
+`daily-content:read`, and put it in `.env.local`:
 
 ```bash
+cp .env.example .env.local
+DIYANET_API_KEY=…
+```
+
+The key stays on the server. The browser only calls this app's own `/api`
+routes, which add the key and forward the request.
+
+**The calendar is fetched once.** One request asks for today through
+today + 365 days and the result is stored in the browser's `localStorage`. The
+app reads from that copy and tops it up with a fresh request when fewer than 30
+future days remain, or when the city changes. If nothing is cached and the API
+cannot be reached, a dialog explains and offers a Reload button.
+
+On first run no city is chosen, so the settings drawer opens on the city search.
+
+The daily content card shows a tab for each of verse, hadith and prayer that
+the API returned. With one section it shows a plain title, and with none the
+card is removed so the prayer times card takes the whole column.
+
+Optional overrides:
+
+```bash
+DIYANET_API_URL=https://diyanetapi.mennova.nl
 OPEN_METEO_BASE_URL=https://api.open-meteo.com/v1
 ```
 
@@ -161,6 +186,9 @@ layers have contracts worth knowing:
 
 ```
 app/
+  api/prayer-times/   proxy to the Diyanet range endpoint
+  api/daily-content/  proxy to the Diyanet daily content endpoint
+  api/places/         city search and nearest city
   api/weather/        current conditions, 10-minute memory cache
   api/audio/          lists any adhan recordings you added
   api/health/         liveness probe
@@ -172,7 +200,8 @@ lib/
   sky.ts              altitude → sky; Maghrib → light/dark interface
   prayer.ts           schedule, next prayer, kerahat windows
   time.ts             timezone-correct conversion and formatting
-  dummy-times.ts      placeholder prayer times
+  diyanet-api.ts      server-side client for the Diyanet API
+  prayer-cache.ts     fetching and localStorage caching of the yearly calendar
 scripts/              the artwork build
 ```
 
@@ -182,4 +211,3 @@ scripts/              the artwork build
 - Kerahat windows are still computed in `lib/prayer.ts` (`schedule.kerahat`,
   the conventional 45-minute İşrak / İstiva / İsfirar windows) but nothing
   renders them — they are meant to be presented differently.
-- Prayer times and the verse of the day are placeholders.

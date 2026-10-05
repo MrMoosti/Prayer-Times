@@ -24,7 +24,11 @@ export const DEFAULT_SETTINGS: Settings = {
 /** Merges stored settings over the defaults so new fields appear on upgrade. */
 export function normalizeSettings(input: unknown): Settings {
   const stored = (input ?? {}) as Partial<Settings>;
-  const location = { ...DEFAULT_SETTINGS.location, ...(stored.location ?? {}) };
+  const location = {
+    ...DEFAULT_SETTINGS.location,
+    ...(stored.location ?? {}),
+  };
+  if (typeof location.cityId !== 'number') location.cityId = null;
   const valid =
     Number.isFinite(location.latitude) &&
     Number.isFinite(location.longitude) &&

@@ -10,6 +10,7 @@ export const PRAYABLE_KEYS = PRAYER_KEYS.filter((k) => k !== 'sunrise') as Exclu
 >[];
 
 export interface LocationSetting {
+  cityId: number | null;
   name: string;
   country: string;
   latitude: number;
@@ -40,8 +41,30 @@ export interface DayTimes {
 }
 
 export interface YearlyCalendar {
+  cityId: number;
   timezone: string;
+  fetchedAt: number;
   days: DayTimes[];
+}
+
+export interface DailyContent {
+  date: string;
+  verse: string | null;
+  verseSource: string | null;
+  hadith: string | null;
+  hadithSource: string | null;
+  pray: string | null;
+  praySource: string | null;
+}
+
+export interface CityResult {
+  id: number;
+  name: string;
+  stateName: string;
+  countryName: string;
+  latitude: number;
+  longitude: number;
+  timezone: string;
 }
 
 export interface WeatherNow {

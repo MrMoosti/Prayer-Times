@@ -24,13 +24,15 @@ export default function Header({ settings, weather, now, dark, onOpenSettings }:
   return (
     <header className="header">
       <div className="meta">
-        <div className="meta__item">
-          <MapPin width={30} height={30} aria-hidden="true" />
-          <div>
-            <div className="meta__label">{settings.location.name}</div>
-            <div className="meta__value">{settings.location.country}</div>
+        {settings.location.cityId != null && (
+          <div className="meta__item">
+            <MapPin width={30} height={30} aria-hidden="true" />
+            <div>
+              <div className="meta__label">{settings.location.name}</div>
+              <div className="meta__value">{settings.location.country}</div>
+            </div>
           </div>
-        </div>
+        )}
         <div className="meta__item">
           <CalendarIcon width={30} height={30} aria-hidden="true" />
           <div>

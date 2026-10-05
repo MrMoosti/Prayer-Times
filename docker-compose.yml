@@ -1,6 +1,7 @@
 # Mektep Prayer — deploy via Coolify (or plain `docker compose up -d`).
 #
-# In Coolify: New Resource → Docker Compose, point it at this repository.
+# In Coolify: New Resource → Docker Compose, point it at this repository,
+# then set DIYANET_API_KEY in the resource's Environment Variables tab.
 # Coolify substitutes SERVICE_FQDN_MEKTEP_3000 with the domain it assigns and
 # routes its proxy to port 3000, so no host port is published here.
 
@@ -16,6 +17,8 @@ services:
       - SERVICE_FQDN_MEKTEP_3000
       - NODE_ENV=production
       - PORT=3000
+      - DIYANET_API_KEY=${DIYANET_API_KEY:-}
+      - DIYANET_API_URL=${DIYANET_API_URL:-https://diyanetapi.mennova.nl}
       - OPEN_METEO_BASE_URL=${OPEN_METEO_BASE_URL:-https://api.open-meteo.com/v1}
     expose:
       - '3000'

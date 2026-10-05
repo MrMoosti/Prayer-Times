@@ -110,6 +110,13 @@ export const BookIcon = (p: IconProps) => (
   </svg>
 );
 
+export const AlertIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M12 4 21 19.5H3Z" />
+    <path d="M12 10v4.4M12 17h.01" />
+  </svg>
+);
+
 /* --- weather glyphs ------------------------------------------------ */
 
 export const SunGlyph = (p: IconProps) => (

@@ -86,7 +86,6 @@ export interface Strings {
   nextPrayerIn: string;
   loadingTimes: string;
   todaysPrayerTimes: string;
-  verseOfTheDay: string;
   hasBegun: (name: string) => string;
   dismiss: string;
   feelsLike: (deg: number) => string;
@@ -114,6 +113,24 @@ export interface Strings {
   reduceMotion: string;
   reduceMotionHint: string;
   resetAll: string;
+  reload: string;
+  errorTitle: string;
+  errorMessage: (reason: string) => string;
+  location: string;
+  locationCurrently: (place: string, tz: string) => string;
+  locationNone: string;
+  searchCity: string;
+  searchHint: string;
+  noCitiesMatched: string;
+  searching: string;
+  searchFailed: string;
+  useMyLocation: string;
+  locating: string;
+  locationFailed: string;
+  contentLabel: string;
+  contentVerse: string;
+  contentHadith: string;
+  contentPray: string;
 }
 
 export const STRINGS: Record<Language, Strings> = {
@@ -126,7 +143,6 @@ export const STRINGS: Record<Language, Strings> = {
     nextPrayerIn: 'Next prayer in',
     loadingTimes: 'Loading times',
     todaysPrayerTimes: 'Today’s Prayer Times',
-    verseOfTheDay: 'Verse of the Day',
     hasBegun: (name) => `${name} has begun`,
     dismiss: 'Dismiss',
     feelsLike: (deg) => `feels like ${deg}°`,
@@ -153,6 +169,25 @@ export const STRINGS: Record<Language, Strings> = {
     reduceMotion: 'Reduce motion',
     reduceMotionHint: 'Stops the drifting clouds and the spinning sun.',
     resetAll: 'Reset all',
+    reload: 'Reload',
+    errorTitle: 'Prayer times unavailable',
+    errorMessage: (reason) =>
+      `The prayer times could not be loaded and nothing is saved on this device yet. ${reason}`,
+    location: 'Location',
+    locationCurrently: (place, tz) => `Currently ${place} (${tz}).`,
+    locationNone: 'No city chosen yet. Search for yours to load the prayer times.',
+    searchCity: 'Search for a city…',
+    searchHint: 'Type at least two letters.',
+    noCitiesMatched: 'No cities matched.',
+    searching: 'Searching…',
+    searchFailed: 'Search is unavailable right now.',
+    useMyLocation: 'Use my current location',
+    locating: 'Locating…',
+    locationFailed: 'Could not find a city near you.',
+    contentLabel: 'Daily content',
+    contentVerse: 'Verse',
+    contentHadith: 'Hadith',
+    contentPray: 'Prayer',
   },
   nl: {
     today: 'Vandaag',
@@ -163,7 +198,6 @@ export const STRINGS: Record<Language, Strings> = {
     nextPrayerIn: 'Volgend gebed over',
     loadingTimes: 'Tijden laden',
     todaysPrayerTimes: 'Gebedstijden van vandaag',
-    verseOfTheDay: 'Vers van de dag',
     hasBegun: (name) => `${name} is begonnen`,
     dismiss: 'Sluiten',
     feelsLike: (deg) => `voelt als ${deg}°`,
@@ -190,6 +224,25 @@ export const STRINGS: Record<Language, Strings> = {
     reduceMotion: 'Beweging beperken',
     reduceMotionHint: 'Stopt de drijvende wolken en de draaiende zon.',
     resetAll: 'Alles herstellen',
+    reload: 'Opnieuw laden',
+    errorTitle: 'Gebedstijden niet beschikbaar',
+    errorMessage: (reason) =>
+      `De gebedstijden konden niet worden geladen en er is nog niets opgeslagen op dit apparaat. ${reason}`,
+    location: 'Locatie',
+    locationCurrently: (place, tz) => `Momenteel ${place} (${tz}).`,
+    locationNone: 'Nog geen stad gekozen. Zoek de jouwe om de gebedstijden te laden.',
+    searchCity: 'Zoek een stad…',
+    searchHint: 'Typ minstens twee letters.',
+    noCitiesMatched: 'Geen steden gevonden.',
+    searching: 'Zoeken…',
+    searchFailed: 'Zoeken is nu niet beschikbaar.',
+    useMyLocation: 'Gebruik mijn huidige locatie',
+    locating: 'Locatie bepalen…',
+    locationFailed: 'Geen stad bij jou in de buurt gevonden.',
+    contentLabel: 'Dagelijkse inhoud',
+    contentVerse: 'Vers',
+    contentHadith: 'Hadith',
+    contentPray: 'Gebed',
   },
   tr: {
     today: 'Bugün',
@@ -200,7 +253,6 @@ export const STRINGS: Record<Language, Strings> = {
     nextPrayerIn: 'Sonraki namaza kalan',
     loadingTimes: 'Vakitler yükleniyor',
     todaysPrayerTimes: 'Bugünün Namaz Vakitleri',
-    verseOfTheDay: 'Günün Ayeti',
     hasBegun: (name) => `${name} vakti girdi`,
     dismiss: 'Kapat',
     feelsLike: (deg) => `hissedilen ${deg}°`,
@@ -227,6 +279,25 @@ export const STRINGS: Record<Language, Strings> = {
     reduceMotion: 'Hareketi azalt',
     reduceMotionHint: 'Süzülen bulutları ve dönen güneşi durdurur.',
     resetAll: 'Tümünü sıfırla',
+    reload: 'Yeniden yükle',
+    errorTitle: 'Namaz vakitleri alınamadı',
+    errorMessage: (reason) =>
+      `Namaz vakitleri yüklenemedi ve bu cihazda henüz kayıtlı veri yok. ${reason}`,
+    location: 'Konum',
+    locationCurrently: (place, tz) => `Şu an ${place} (${tz}).`,
+    locationNone: 'Henüz şehir seçilmedi. Vakitleri yüklemek için şehrinizi arayın.',
+    searchCity: 'Bir şehir arayın…',
+    searchHint: 'En az iki harf yazın.',
+    noCitiesMatched: 'Eşleşen şehir yok.',
+    searching: 'Aranıyor…',
+    searchFailed: 'Arama şu an kullanılamıyor.',
+    useMyLocation: 'Mevcut konumumu kullan',
+    locating: 'Konum bulunuyor…',
+    locationFailed: 'Yakınınızda şehir bulunamadı.',
+    contentLabel: 'Günün içeriği',
+    contentVerse: 'Ayet',
+    contentHadith: 'Hadis',
+    contentPray: 'Dua',
   },
 };
 

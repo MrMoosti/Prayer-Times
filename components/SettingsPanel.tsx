@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import LocationPicker from './LocationPicker';
 import { CloseIcon, PrayerGlyph } from './icons';
 import { LANGUAGES, LANGUAGE_LABELS, prayerLabels, strings, type Language } from '@/lib/i18n';
 import {
@@ -113,6 +114,8 @@ export default function SettingsPanel({ settings, onChange, onReset, onClose }: 
               ))}
             </div>
           </div>
+
+          <LocationPicker settings={settings} onChange={onChange} />
 
           <div className="field">
             <span className="field__label">{t.timeOffsets}</span>

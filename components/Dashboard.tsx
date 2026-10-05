@@ -7,13 +7,16 @@ import Header from './Header';
 import PrayerTimesCard from './PrayerTimesCard';
 import SceneBackground from './scene/SceneBackground';
 import SettingsPanel from './SettingsPanel';
-import VerseCard from './VerseCard';
+import DailyContentCard, { contentSections } from './DailyContentCard';
+import StatusDialog from './StatusDialog';
 import { unlockAudio } from '@/lib/adhan';
 import { buildSchedule, type Schedule } from '@/lib/prayer';
 import type { PrayerKey, Settings } from '@/lib/types';
 import { useAnnouncer } from '@/lib/useAnnouncer';
 import { useNow } from '@/lib/useNow';
-import { useCalendar, useWeather } from '@/lib/usePrayerData';
+import { useCalendar } from '@/lib/useCalendar';
+import { useDailyContent } from '@/lib/useDailyContent';
+import { useWeather } from '@/lib/usePrayerData';
 import { useSettings } from '@/lib/useSettings';
 
 function BootShell() {
@@ -59,14 +62,24 @@ export default function Dashboard() {
   const minuteNow = useNow(60_000);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [cityPrompted, setCityPrompted] = useState(false);
   const openSettings = useCallback(() => setSettingsOpen(true), []);
   const closeSettings = useCallback(() => setSettingsOpen(false), []);
 
-  const calendar = useCalendar(settings);
+  const { calendar, status, error, reload } = useCalendar(settings, ready);
+  const dailyContent = useDailyContent(settings, ready);
+  const hasContent = contentSections(dailyContent).length > 0;
+
+  useEffect(() => {
+    if (status === 'no-city' && !cityPrompted) {
+      setSettingsOpen(true);
+      setCityPrompted(true);
+    }
+  }, [status, cityPrompted]);
   const weather = useWeather(settings, ready);
 
   const schedule = useMemo(
-    () => buildSchedule(calendar, settings, now),
+    () => (calendar ? buildSchedule(calendar, settings, now) : null),
     [calendar, settings, now],
   );
 
@@ -115,16 +128,22 @@ export default function Dashboard() {
 
         <main className="app__main">
           <CountdownCard schedule={schedule} settings={settings} now={now} />
-          <div className="app__column">
+          <div className="app__column" data-solo={!hasContent}>
             <PrayerTimesCard
               schedule={schedule}
               settings={settings}
-              loading={!ready}
+              loading={!ready || status === 'loading'}
             />
-            <VerseCard settings={settings} />
+            {dailyContent && hasContent && (
+              <DailyContentCard content={dailyContent} settings={settings} />
+            )}
           </div>
         </main>
       </div>
+
+      {status === 'error' && !settingsOpen && (
+        <StatusDialog settings={settings} reason={error} onReload={reload} />
+      )}
 
       {settingsOpen && (
         <SettingsPanel
