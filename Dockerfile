@@ -1,36 +1,33 @@
 # syntax=docker/dockerfile:1
 
-# Debian slim rather than Alpine: sharp is a build dependency and its musl
-# story is the usual source of "works locally, not in CI".
-FROM node:22-bookworm-slim AS deps
+FROM node:24-trixie-slim AS deps
 WORKDIR /app
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false \
+    NPM_CONFIG_FUND=false \
+    NPM_CONFIG_AUDIT=false
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:22-bookworm-slim AS builder
+FROM node:24-trixie-slim AS builder
 WORKDIR /app
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    NPM_CONFIG_UPDATE_NOTIFIER=false
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# The scene artwork is committed, so the image never needs to run `npm run scene`.
 RUN npm run build
 
-FROM node:22-bookworm-slim AS runner
+FROM node:24-trixie-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 
-RUN groupadd --system --gid 1001 nodejs \
- && useradd --system --uid 1001 --gid nodejs nextjs
+COPY --from=builder --chown=node:node /app/public ./public
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 
-COPY --from=builder /app/public ./public
-# `output: 'standalone'` emits a server with only the modules it actually uses.
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
+USER node
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
