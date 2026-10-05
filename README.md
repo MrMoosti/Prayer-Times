@@ -333,7 +333,7 @@ components/           header, cards, settings drawer, scene
 lib/
   solar.ts            sun/moon position
   sky.ts              altitude to sky; Maghrib to light/dark interface
-  prayer.ts           schedule, next prayer, kerahat windows
+  prayer.ts           schedule and next prayer
   time.ts             timezone-correct conversion and formatting
   diyanet-api.ts      server-side client for the Diyanet API
   prayer-cache.ts     fetching and localStorage caching of the yearly calendar
@@ -354,9 +354,6 @@ scripts/              the artwork build
 ## Known gaps
 
 - One screen. There is no navigation and no other page.
-- Kerahat windows are still computed in `lib/prayer.ts` (`schedule.kerahat`,
-  the conventional 45-minute İşrak / İstiva / İsfirar windows) but nothing
-  renders them.
 
 ## License
 
